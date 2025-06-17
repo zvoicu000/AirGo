@@ -1,6 +1,8 @@
 import { Construct } from 'constructs';
-import { NestedStack, NestedStackProps } from 'aws-cdk-lib';
+import { NestedStack, NestedStackProps, Duration } from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { EnvironmentConfig, Stage } from '../../../config';
 import { CustomLambda } from '../../constructs';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
@@ -41,5 +43,14 @@ export class LambdaResources extends NestedStack {
       },
     }).lambda;
     spatialDataTable.grantReadData(this.processRoute);
+
+    // Create EventBridge rule to trigger loadWeatherData function every hour
+    const weatherDataScheduleRule = new Rule(this, 'WeatherDataScheduleRule', {
+      description: 'Triggers loadWeatherData function every hour',
+      schedule: Schedule.rate(Duration.hours(1)),
+    });
+
+    // Add the Lambda function as a target for the EventBridge rule
+    weatherDataScheduleRule.addTarget(new LambdaFunction(this.loadWeatherData));
   }
 }
