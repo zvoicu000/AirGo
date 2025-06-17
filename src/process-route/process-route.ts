@@ -11,8 +11,9 @@ import * as geohash from 'ngeohash';
 const client = new DynamoDBClient({});
 const ddb = DynamoDBDocumentClient.from(client);
 
+// Load environment variables
 const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
-const GEOHASH_PRECISION = 5; // Approx 5km resolution for partitioning
+const GEOHASH_PRECISION = parseFloat(process.env.GEOHASH_PRECISION || '5');
 
 interface BoundingBoxEvent {
   latMin: number;

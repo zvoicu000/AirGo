@@ -21,11 +21,11 @@ export class StatefulStack extends Stack {
 
   constructor(scope: Construct, id: string, props: StatefulStackProps) {
     super(scope, id, props);
-    const { stage } = props;
+    const { stage, envConfig } = props;
 
     // Define a DynamoDB table that will be used to store the spatial data
     this.spatialDataTable = new CustomTable(this, 'SpatialDataTable', {
-      tableName: 'SpatialDataTable',
+      tableName: envConfig.spatialDataTableName,
       stageName: stage,
       dataPath: path.join(__dirname, '../../resources/seed-data/population-data/processed'),
       removalPolicy: getRemovalPolicyFromStage(stage),

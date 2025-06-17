@@ -24,6 +24,11 @@ export class LambdaResources extends NestedStack {
     this.loadWeatherData = new CustomLambda(this, 'LoadWeatherDataFunction', {
       envConfig: envConfig,
       source: 'src/data-loading/load-weather-data.ts',
+      environmentVariables: {
+        SPATIAL_DATA_TABLE: spatialDataTable.tableName,
+        WEATHER_DATA_SOURCE_URL: envConfig.weatherDataSourceUrl,
+        WEATHER_DATA_TTL_SECONDS: envConfig.weatherDataTtlSeconds?.toString(),
+      },
     }).lambda;
     spatialDataTable.grantReadWriteData(this.loadWeatherData);
 
