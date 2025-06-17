@@ -189,6 +189,7 @@ export class WeatherReport {
       SK: `WEA#${geohash.encode(this.lat, this.lon, SORT_KEY_HASH_PRECISION)}`,
       lat: this.lat,
       lon: this.lon,
+      type: 'Weather',
       dataTimestamp: this.dataTimestamp,
       recordTimestamp: this.recordTimestamp,
       ttl: this.ttl,
