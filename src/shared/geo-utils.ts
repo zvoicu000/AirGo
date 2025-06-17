@@ -1,13 +1,28 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as geohash from 'ngeohash';
-import { getDistance, getRhumbLineBearing, computeDestinationPoint } from 'geolib';
+import { logger } from '../shared';
+import { getDistance, getRhumbLineBearing, computeDestinationPoint, getDistanceFromLine } from 'geolib';
 
 export type Point = { lat: number; lon: number };
 export type BoundingBox = { latMin: number; lonMin: number; latMax: number; lonMax: number };
 
 /**
- * Returns a Set of GeoHashes (precision 5) intersected by the route.
+ * Generates a list of geohashes representing the route between two geographic points.
+ *
+ * The function computes geohashes along the straight path (rhumb line) from the start point to the end point,
+ * at intervals specified by `stepMeters`. The geohash precision can be customized.
+ * The start and end points are always included in the result.
+ *
+ * @param start - The starting geographic point with latitude and longitude.
+ * @param end - The ending geographic point with latitude and longitude.
+ * @param precision - The number of characters in the geohash (default is 5).
+ * @param stepMeters - The distance in meters between each computed geohash along the route (default is 100).
+ * @returns An array of unique geohash strings covering the route from start to end.
  */
 export function getRouteGeoHashes(start: Point, end: Point, precision = 5, stepMeters = 100): Array<string> {
+  const routeLength = getDistance(start, end); // in meters
+  logger.debug(`Route length from start to end: ${routeLength} meters`, { start, end });
+
   const geoHashes = new Set<string>();
 
   // Always include start and end
@@ -26,4 +41,44 @@ export function getRouteGeoHashes(start: Point, end: Point, precision = 5, stepM
   }
 
   return Array.from(geoHashes);
+}
+
+/**
+ * Returns an array of geo points that are near the route defined by the start and end points.
+ *
+ * - For points of type `'Population'`, only those within 500 meters of the route are included.
+ * - For points of type `'Weather'`, only those within 10,000 meters of the route are included.
+ *
+ * @param start - The starting point of the route.
+ * @param end - The ending point of the route.
+ * @param geoPoints - An array of geo points to check, each expected to have `lat`, `lon`, and `type` properties.
+ * @returns An array of geo points that are near the route according to their type-specific distance thresholds.
+ */
+export function getPointsNearRoute(start: Point, end: Point, geoPoints: Array<any>): Array<any> {
+  const results: Array<any> = [];
+  const populationDistanceThreshold = 500; // Distance in meters
+  const weatherDistanceThreshold = 10000; // Distance in meters
+
+  const routeLength = getDistance(start, end); // in meters
+  logger.debug(`Route length from start to end: ${routeLength} meters`, { start, end });
+
+  for (const point of geoPoints) {
+    if (point.lat && point.lon) {
+      const distance = getDistanceFromLine(
+        { latitude: point.lat, longitude: point.lon },
+        { latitude: start.lat, longitude: start.lon },
+        { latitude: end.lat, longitude: end.lon },
+      );
+      logger.debug(`Distance from point to route: ${distance} meters`, { point });
+
+      if (distance <= populationDistanceThreshold && point.type === 'Population') {
+        results.push(point);
+      }
+      if (distance <= weatherDistanceThreshold && point.type === 'Weather') {
+        results.push(point);
+      }
+    }
+  }
+
+  return results;
 }
