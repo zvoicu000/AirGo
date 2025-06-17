@@ -2,7 +2,11 @@
  * Weather Object
  */
 
+import * as geohash from 'ngeohash';
 import { isNumeric, roundTo } from '../shared';
+
+const GEOHASH_PRECISION = parseFloat(process.env.GEOHASH_PRECISION || '5');
+const SORT_KEY_HASH_PRECISION = 8; // GeoHash precision for sort key
 
 // Setup the lookup tables for the METARs
 const PRECIPITATION_LEVEL = {
@@ -116,7 +120,7 @@ export class WeatherReport {
    * @param {any} metar - The METAR object
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  createWeatherReportFromMetar(metar: any) {
+  constructor(metar: any) {
     // Run some validation checks on the data
     this.isValid = true;
     if (metar['latitude'] && metar['longitude']) {
@@ -176,20 +180,22 @@ export class WeatherReport {
    * @returns {JSON} - The JSON object in format required to upload to DynamoDB
    */
   getDynamoDBJson() {
-    const json = {
-      GeoPoint: {
-        latitude: this.lat,
-        longitude: this.lon,
-      },
-      PutItemInput: {
-        Item: {},
-      },
-    };
-
-    if (this.isValid) {
-      return json;
-    } else {
-      return null;
+    if (!this.isValid) {
+      return undefined;
     }
+
+    return {
+      PK: geohash.encode(this.lat, this.lon, GEOHASH_PRECISION),
+      SK: `WEA#${geohash.encode(this.lat, this.lon, SORT_KEY_HASH_PRECISION)}`,
+      lat: this.lat,
+      lon: this.lon,
+      dataTimestamp: this.dataTimestamp,
+      recordTimestamp: this.recordTimestamp,
+      ttl: this.ttl,
+      ...(this.temperature && { temperature: this.temperature }),
+      ...(this.windSpeed && { windSpeed: this.windSpeed }),
+      ...(this.visibility && { visibility: this.visibility }),
+      ...(this.precipitationLevel && { precipitationLevel: this.precipitationLevel }),
+    };
   }
 }
