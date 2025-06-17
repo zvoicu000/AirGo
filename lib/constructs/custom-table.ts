@@ -57,7 +57,10 @@ export class CustomTable extends Construct {
     const fixedProps: FixedCustomTableProps = {
       billingMode: BillingMode.PAY_PER_REQUEST,
       encryption: TableEncryption.AWS_MANAGED,
-      pointInTimeRecovery: true,
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: true,
+        recoveryPeriodInDays: 7,
+      },
       contributorInsightsEnabled: true,
       timeToLiveAttribute: 'ttl',
     };

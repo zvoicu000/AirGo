@@ -39,9 +39,10 @@ proj4.defs(
   '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs',
 );
 
-const bng = 'EPSG:27700';
-const wgs84 = 'EPSG:4326';
-
+const BNG = 'EPSG:27700';
+const WGS84 = 'EPSG:4326';
+const PARTITION_KEY_HASH_PRECISION = 5; // GeoHash precision for partition key
+const SORT_KEY_HASH_PRECISION = 8; // GeoHash precision for sort key
 const INPUT_FILE = 'resources/seed-data/population-data/input/uk-population-data.tif';
 const OUTPUT_FILE = 'resources/seed-data/population-data/processed/uk-population-data.json.gzip';
 
@@ -84,10 +85,10 @@ async function extractPopulationData(tifPath: string): Promise<void> {
       const easting = originX + x * xRes;
       const northing = originY + y * yRes;
 
-      const [lon, lat] = proj4(bng, wgs84, [easting, northing]);
+      const [lon, lat] = proj4(BNG, WGS84, [easting, northing]);
 
-      const pk = ngeohash.encode(lat, lon, 6);
-      const sk = `POP#${ngeohash.encode(lat, lon, 8)}`;
+      const pk = ngeohash.encode(lat, lon, PARTITION_KEY_HASH_PRECISION);
+      const sk = `POP#${ngeohash.encode(lat, lon, SORT_KEY_HASH_PRECISION)}`;
 
       const item = {
         PK: pk,
