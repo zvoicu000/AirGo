@@ -16,6 +16,7 @@ interface LambdaResourcesProps extends NestedStackProps {
 export class LambdaResources extends NestedStack {
   public loadWeatherData: NodejsFunction;
   public processRoute: NodejsFunction;
+  public optimiseRoute: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaResourcesProps) {
     super(scope, id, props);
@@ -37,12 +38,22 @@ export class LambdaResources extends NestedStack {
     // Create the ProcessRoute Lambda function
     this.processRoute = new CustomLambda(this, 'ProcessRouteFunction', {
       envConfig: envConfig,
-      source: 'src/process-route/process-route.ts',
+      source: 'src/route-engine/process-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
       },
     }).lambda;
     spatialDataTable.grantReadData(this.processRoute);
+
+    // Create the OptimiseRoute Lambda function
+    this.optimiseRoute = new CustomLambda(this, 'OptimiseRouteFunction', {
+      envConfig: envConfig,
+      source: 'src/route-engine/optimise-route.ts',
+      environmentVariables: {
+        SPATIAL_DATA_TABLE: spatialDataTable.tableName,
+      },
+    }).lambda;
+    spatialDataTable.grantReadData(this.optimiseRoute);
 
     // Create EventBridge rule to trigger loadWeatherData function every hour
     const weatherDataScheduleRule = new Rule(this, 'WeatherDataScheduleRule', {
