@@ -64,7 +64,7 @@ export function getRouteGeoHashes(
  * Returns an array of geo points that are near the route defined by the start and end points.
  *
  * - For points of type `'Population'`, only those within 500 meters of the route are included.
- * - For points of type `'Weather'`, only those within 10,000 meters of the route are included.
+ * - For points of type `'Weather'`, only those within 20,000 meters of the route are included.
  *
  * @param start - The starting point of the route.
  * @param end - The ending point of the route.
