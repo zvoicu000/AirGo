@@ -66,11 +66,15 @@ export const handler = async (event: RouteEvent) => {
       }),
     );
   }
-  logger.info('Queried Results', { count: results.length });
+  logger.info('Queried Results from GeoHashes', { count: results.length });
 
   // Find the geoPoints that are within the route
   const nearbyPoints = getPointsNearRoute(startPoint, endPoint, results);
   logger.info('Points near the route', { count: nearbyPoints.length });
+  logger.debug('Population and Weather Points near the route', {
+    population: nearbyPoints.filter((p) => p.type === 'Population').length,
+    weather: nearbyPoints.filter((p) => p.type === 'Weather').length,
+  });
 
   return {
     statusCode: 200,

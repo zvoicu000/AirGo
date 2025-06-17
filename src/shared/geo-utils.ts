@@ -17,9 +17,16 @@ export type BoundingBox = { latMin: number; lonMin: number; latMax: number; lonM
  * @param end - The ending geographic point with latitude and longitude.
  * @param precision - The number of characters in the geohash (default is 5).
  * @param stepMeters - The distance in meters between each computed geohash along the route (default is 100).
+ * @param bufferMeters - The buffer distance in meters around the route to include additional geohashes (default is 10,000).
  * @returns An array of unique geohash strings covering the route from start to end.
  */
-export function getRouteGeoHashes(start: Point, end: Point, precision = 5, stepMeters = 100): Array<string> {
+export function getRouteGeoHashes(
+  start: Point,
+  end: Point,
+  precision = 5,
+  stepMeters = 1000, // 1km spacing for performance
+  bufferMeters = 10000,
+): string[] {
   const routeLength = getDistance(start, end); // in meters
   logger.debug(`Route length from start to end: ${routeLength} meters`, { start, end });
 
@@ -29,15 +36,25 @@ export function getRouteGeoHashes(start: Point, end: Point, precision = 5, stepM
   geoHashes.add(geohash.encode(start.lat, start.lon, precision));
   geoHashes.add(geohash.encode(end.lat, end.lon, precision));
 
-  const distance = getDistance(start, end); // in meters
-  const bearing = getRhumbLineBearing(start, end); // constant bearing
+  const bearing = getRhumbLineBearing(start, end);
+  const steps = Math.floor(routeLength / stepMeters);
 
-  const steps = Math.floor(distance / stepMeters);
+  for (let i = 0; i <= steps; i++) {
+    const point = computeDestinationPoint(start, i * stepMeters, bearing);
 
-  for (let i = 1; i < steps; i++) {
-    const point = computeDestinationPoint(start, stepMeters * i, bearing);
-    const hash = geohash.encode(point.latitude, point.longitude, precision);
-    geoHashes.add(hash);
+    // Convert buffer radius from meters to degrees approximately
+    const latBuffer = bufferMeters / 111000; // 1 deg ≈ 111 km
+    const lonBuffer = bufferMeters / (111000 * Math.cos((point.latitude * Math.PI) / 180));
+
+    const hashes = geohash.bboxes(
+      point.latitude - latBuffer,
+      point.longitude - lonBuffer,
+      point.latitude + latBuffer,
+      point.longitude + lonBuffer,
+      precision,
+    );
+
+    hashes.forEach((h) => geoHashes.add(h));
   }
 
   return Array.from(geoHashes);
@@ -57,7 +74,7 @@ export function getRouteGeoHashes(start: Point, end: Point, precision = 5, stepM
 export function getPointsNearRoute(start: Point, end: Point, geoPoints: Array<any>): Array<any> {
   const results: Array<any> = [];
   const populationDistanceThreshold = 500; // Distance in meters
-  const weatherDistanceThreshold = 10000; // Distance in meters
+  const weatherDistanceThreshold = 20000; // Distance in meters
 
   const routeLength = getDistance(start, end); // in meters
   logger.debug(`Route length from start to end: ${routeLength} meters`, { start, end });
@@ -69,7 +86,7 @@ export function getPointsNearRoute(start: Point, end: Point, geoPoints: Array<an
         { latitude: start.lat, longitude: start.lon },
         { latitude: end.lat, longitude: end.lon },
       );
-      logger.debug(`Distance from point to route: ${distance} meters`, { point });
+      //logger.debug(`Distance from point to route: ${distance} meters`, { point });
 
       if (distance <= populationDistanceThreshold && point.type === 'Population') {
         results.push(point);
