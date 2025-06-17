@@ -1,6 +1,17 @@
 import { RemovalPolicy } from 'aws-cdk-lib';
 import { Region, Stage } from '@config/types';
 
+export function getStage(stage: string): string {
+  switch (stage) {
+    case Stage.prod:
+      return Stage.prod;
+    case Stage.dev:
+      return Stage.dev;
+    default:
+      return Stage.dev; // return the dev environment if not known
+  }
+}
+
 export interface EnvironmentConfig {
   env: {
     account: string;
@@ -77,8 +88,8 @@ export const getEnvironmentConfig = (stage: Stage): EnvironmentConfig => {
 };
 
 export function getRemovalPolicyFromStage(stage: Stage): RemovalPolicy {
-  if (stage !== Stage.stg && stage !== Stage.prod) {
-    return RemovalPolicy.DESTROY; // retain the prod and staging resources
+  if (stage !== Stage.prod) {
+    return RemovalPolicy.DESTROY; // retain the prod resources
   }
   return RemovalPolicy.RETAIN;
 }

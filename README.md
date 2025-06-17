@@ -72,3 +72,27 @@ The infrastructure and application deployment is managed through CodePipeline. T
 - `prod` - Deploys to the production environment
 - `stg` - Deploys to the staging environment
 - `dev` - Deploys to the development environment
+
+
+
+
+## Getting Started
+
+npm install
+
+Set the region in `config/types.ts`
+
+cdk bootstrap --region eu-west-1
+
+cdk deploy --all
+
+Initial deployment will take some time as it seeds the DynamoDB table with initial data.
+There is limited cost as this is seeded directly from S3 rather than using Put operations.
+
+
+Nearly 800k data points in the UK
+
+
+Contains data supplied by UK Centre for Ecology & Hydrology.
+
+exploit the Information commercially and non-commercially for example, by combining it with other Information, or by including it in your own product or application.

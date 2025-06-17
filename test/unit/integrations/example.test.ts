@@ -1,4 +1,4 @@
-import { handler } from '../../../src/integrations/example';
+import { handler } from '../../../src/data-loading/load-weather-data';
 
 describe('Example Lambda Function', () => {
   test('successful execution', async () => {

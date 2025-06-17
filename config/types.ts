@@ -3,11 +3,10 @@
  */
 
 export const enum Region {
-  primary = 'us-east-1',
+  primary = 'eu-west-1',
 }
 
 export const enum Stage {
   dev = 'dev',
-  stg = 'stg',
   prod = 'prod',
 }
