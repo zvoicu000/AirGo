@@ -386,3 +386,6 @@ cdk.out
 *.js.map
 *.tsbuildinfo
 *.tsbuildinfo.d.ts
+
+### Local development ###
+local.env.json

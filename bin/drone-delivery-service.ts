@@ -19,6 +19,7 @@ const statefulStack = new StatefulStack(app, 'StatefulStack', {
 const statelessStack = new StatelessStack(app, 'StatelessStack', {
   stage: stage,
   envConfig: envConfig,
+  spatialDataTable: statefulStack.spatialDataTable,
 });
 
 // Ensure the stateful stack is deployed before the stateless stack

@@ -8,12 +8,12 @@
  * - Adds dependencies to ensure correct resource creation order.
  *
  * @remarks
- * The table is only pre-populated with data in non-production stages, as determined by the presence of `dataPath`.
+ * The table is only pre-populated when required, as determined by the presence of `dataPath`.
  *
  * @example
  * ```typescript
  * new CustomTable(this, 'MyTable', {
- *   partitionKey: { name: 'id', type: AttributeType.STRING },
+ *   partitionKey: { name: 'PK', type: AttributeType.STRING },
  *   dataPath: './seed-data'
  * });
  * ```
@@ -73,6 +73,7 @@ export class CustomTable extends Construct {
       // create the deployment of the local json files into s3 for the table import
       deployment = new BucketDeployment(this, 'BucketDeployment', {
         sources: [Source.asset(props.dataPath)],
+        exclude: ['*.DS_Store'],
         destinationBucket: dynamoDbSeedDataBucket,
       });
 

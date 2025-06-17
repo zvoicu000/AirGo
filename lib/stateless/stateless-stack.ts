@@ -8,10 +8,12 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { EnvironmentConfig, Stage } from '@config';
 import { LambdaResources } from './nested/lambda-stack';
+import { Table } from 'aws-cdk-lib/aws-dynamodb';
 
 export interface StatelessStackProps extends StackProps {
   stage: Stage;
   envConfig: EnvironmentConfig;
+  spatialDataTable: Table;
 }
 
 export class StatelessStack extends Stack {
@@ -25,6 +27,7 @@ export class StatelessStack extends Stack {
     this.lambdaResources = new LambdaResources(this, 'LambdaResources', {
       stage: stage,
       envConfig: envConfig,
+      spatialDataTable: props.spatialDataTable,
     });
   }
 }

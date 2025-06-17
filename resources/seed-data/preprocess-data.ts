@@ -43,7 +43,7 @@ const bng = 'EPSG:27700';
 const wgs84 = 'EPSG:4326';
 
 const INPUT_FILE = 'resources/seed-data/population-data/input/uk-population-data.tif';
-const OUTPUT_FILE = 'resources/seed-data/population-data/processed/uk-population-data.gzip';
+const OUTPUT_FILE = 'resources/seed-data/population-data/processed/uk-population-data.json.gzip';
 
 async function extractPopulationData(tifPath: string): Promise<void> {
   const buffer = fs.readFileSync(tifPath);
@@ -99,7 +99,7 @@ async function extractPopulationData(tifPath: string): Promise<void> {
       };
 
       const marshalled = marshall(item);
-      gzipStream.write(JSON.stringify(marshalled) + '\n');
+      gzipStream.write(JSON.stringify({ Item: marshalled }) + '\n');
     }
   }
 

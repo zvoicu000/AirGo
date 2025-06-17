@@ -6,6 +6,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:esbuild": "node_modules/.bin/esbuild --bundle src/**/*.ts --outbase=src/ --outdir=dist/ --sourcemap=inline --platform=node",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
@@ -17,6 +18,8 @@
   },
   "devDependencies": {
     "@aws-lambda-powertools/logger": "^2.21.0",
+    "@aws-sdk/client-dynamodb": "^3.830.0",
+    "@aws-sdk/lib-dynamodb": "^3.830.0",
     "@aws-sdk/util-dynamodb": "^3.830.0",
     "@eslint/js": "^9.29.0",
     "@eslint/json": "^0.12.0",
