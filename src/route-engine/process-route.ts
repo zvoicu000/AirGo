@@ -76,6 +76,12 @@ export const handler = async (event: RouteEvent) => {
     weather: nearbyPoints.filter((p) => p.type === 'Weather').length,
   });
 
+  // Calculate the impacted population by summing the population values of nearby points, round the result to the nearest integer
+  const impactedPopulation = Math.round(
+    nearbyPoints.filter((p) => p.type === 'Population').reduce((sum, point) => sum + (point.population || 0), 0),
+  );
+  logger.info('Impacted Population', { count: impactedPopulation });
+
   return {
     statusCode: 200,
   };
