@@ -1,8 +1,8 @@
 import { Construct } from 'constructs';
-import { NestedStack, NestedStackProps, Duration } from 'aws-cdk-lib';
+import { NestedStack, NestedStackProps } from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
-import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
+import { CfnSchedule } from 'aws-cdk-lib/aws-scheduler';
+import { Role, ServicePrincipal, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { EnvironmentConfig, Stage } from '../../../config';
 import { CustomLambda } from '../../constructs';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
@@ -55,13 +55,30 @@ export class LambdaResources extends NestedStack {
     }).lambda;
     spatialDataTable.grantReadData(this.optimiseRoute);
 
-    // Create EventBridge rule to trigger loadWeatherData function every hour
-    const weatherDataScheduleRule = new Rule(this, 'WeatherDataScheduleRule', {
-      description: 'Triggers loadWeatherData function every hour',
-      schedule: Schedule.rate(Duration.hours(1)),
+    // Create IAM role for the EventBridge Scheduler
+    const schedulerRole = new Role(this, 'WeatherDataSchedulerRole', {
+      assumedBy: new ServicePrincipal('scheduler.amazonaws.com'),
     });
 
-    // Add the Lambda function as a target for the EventBridge rule
-    weatherDataScheduleRule.addTarget(new LambdaFunction(this.loadWeatherData));
+    // Grant the scheduler role permission to invoke the Lambda function
+    schedulerRole.addToPolicy(
+      new PolicyStatement({
+        actions: ['lambda:InvokeFunction'],
+        resources: [this.loadWeatherData.functionArn],
+      }),
+    );
+
+    // Create EventBridge scheduler to trigger loadWeatherData function every hour
+    new CfnSchedule(this, 'WeatherDataSchedule', {
+      flexibleTimeWindow: {
+        mode: 'OFF',
+      },
+      scheduleExpression: 'cron(0 * * * ? *)', // Every hour at minute 0
+      description: 'Triggers loadWeatherData function every hour',
+      target: {
+        arn: this.loadWeatherData.functionArn,
+        roleArn: schedulerRole.roleArn,
+      },
+    });
   }
 }

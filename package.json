@@ -11,6 +11,7 @@
     "test": "jest",
     "cdk": "cdk",
     "synth": "cdk synth --all",
+    "deploy": "cdk deploy --all --require-approval never",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:unit": "jest",

@@ -107,6 +107,8 @@ export class WeatherReport {
   isValid: boolean = true;
   lat: number;
   lon: number;
+  lowPrecisionGeohash: string;
+  highPrecisionGeohash: string;
   dataTimestamp: number;
   recordTimestamp: number;
   ttl: number;
@@ -149,6 +151,10 @@ export class WeatherReport {
       this.recordTimestamp = Math.floor(Date.now() / 1000);
       this.ttl = Math.floor(Date.now() / 1000) + 86400;
 
+      // Setup the geohash precision
+      this.lowPrecisionGeohash = geohash.encode(this.lat, this.lon, GEOHASH_PRECISION);
+      this.highPrecisionGeohash = geohash.encode(this.lat, this.lon, SORT_KEY_HASH_PRECISION);
+
       // Set the weather information
       if (metar['temp_c']) if (isNumeric(metar['temp_c'][0])) this.temperature = metar['temp_c'][0];
       if (metar['wind_speed_kt'])
@@ -185,8 +191,10 @@ export class WeatherReport {
     }
 
     return {
-      PK: geohash.encode(this.lat, this.lon, GEOHASH_PRECISION),
-      SK: `WEA#${geohash.encode(this.lat, this.lon, SORT_KEY_HASH_PRECISION)}`,
+      PK: this.lowPrecisionGeohash,
+      SK: this.highPrecisionGeohash,
+      GSI1PK: this.lowPrecisionGeohash,
+      GSI1SK: this.highPrecisionGeohash,
       lat: this.lat,
       lon: this.lon,
       type: 'Weather',

@@ -1,3 +1,36 @@
+/**
+ * A CDK construct that creates a custom AWS Lambda function using Node.js.
+ *
+ * This construct wraps the `NodejsFunction` from `@aws-cdk/aws-lambda-nodejs` and applies
+ * default configuration, while allowing overrides via `CustomLambdaProps`.
+ *
+ * Features:
+ * - Merges default Lambda properties with user-provided properties.
+ * - Sets up environment variables including PowerTools and custom variables.
+ * - Supports VPC configuration, custom memory size, timeout, and logging.
+ * - Bundles Lambda code with source maps and optional minification.
+ * - Uses ARM_64 architecture and the latest Node.js runtime.
+ *
+ * @example
+ * ```typescript
+ * new CustomLambda(this, 'MyFunction', {
+ *   functionName: 'my-lambda',
+ *   source: 'src/my-function.ts',
+ *   handler: 'handler',
+ *   envConfig: { env: { region: 'us-east-1' }, logLevel: 'INFO', minifyCodeOnDeployment: false },
+ *   environmentVariables: { FOO: 'bar' },
+ * });
+ * ```
+ *
+ * @extends Construct
+ *
+ * @property {NodejsFunction} lambda - The underlying NodejsFunction instance.
+ *
+ * @param scope - The parent construct.
+ * @param id - The unique identifier for this construct.
+ * @param props - Custom properties for configuring the Lambda function.
+ */
+
 import * as path from 'path';
 import { Construct } from 'constructs';
 import { Duration } from 'aws-cdk-lib';

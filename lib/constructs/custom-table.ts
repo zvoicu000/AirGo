@@ -32,6 +32,7 @@ import {
   TableEncryption,
   InputFormat,
   InputCompressionType,
+  GlobalSecondaryIndexProps,
 } from 'aws-cdk-lib/aws-dynamodb';
 
 import { Construct } from 'constructs';
@@ -41,6 +42,7 @@ interface CustomTableProps extends Pick<TableProps, 'removalPolicy' | 'partition
   partitionKey: Attribute; // The partition key attribute for the table
   removalPolicy: RemovalPolicy; //The removal policy for the table
   dataPath?: string; // The optional data path to the json files
+  globalSecondaryIndexes?: GlobalSecondaryIndexProps[]; // Optional global secondary indexes to add to the table
 }
 
 type FixedCustomTableProps = Omit<TableProps, 'removalPolicy' | 'partitionKey' | 'tableName' | 'sortKey'>;
@@ -99,6 +101,13 @@ export class CustomTable extends Construct {
     // if we have a dataPath, we add a dependency on the bucket deployment
     if (props.dataPath) {
       this.table.node.addDependency(deployment as BucketDeployment);
+    }
+
+    // Add any global secondary indexes if provided
+    if (props.globalSecondaryIndexes) {
+      for (const index of props.globalSecondaryIndexes) {
+        this.table.addGlobalSecondaryIndex(index);
+      }
     }
   }
 }
