@@ -17,6 +17,7 @@ export class LambdaResources extends NestedStack {
   public loadWeatherData: NodejsFunction;
   public processRoute: NodejsFunction;
   public optimiseRoute: NodejsFunction;
+  public getBoundingBox: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: LambdaResourcesProps) {
     super(scope, id, props);
@@ -31,6 +32,9 @@ export class LambdaResources extends NestedStack {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
         WEATHER_DATA_SOURCE_URL: envConfig.weatherDataSourceUrl,
         WEATHER_DATA_TTL_SECONDS: envConfig.weatherDataTtlSeconds?.toString(),
+        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
+        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
+        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
     spatialDataTable.grantReadWriteData(this.loadWeatherData);
@@ -41,6 +45,9 @@ export class LambdaResources extends NestedStack {
       source: 'src/route-engine/process-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
+        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
+        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
+        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
     spatialDataTable.grantReadData(this.processRoute);
@@ -51,9 +58,25 @@ export class LambdaResources extends NestedStack {
       source: 'src/route-engine/optimise-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
+        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
+        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
+        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
     spatialDataTable.grantReadData(this.optimiseRoute);
+
+    // Create the GetBoundingBox Lambda function
+    this.getBoundingBox = new CustomLambda(this, 'GetBoundingBoxFunction', {
+      envConfig: envConfig,
+      source: 'src/queries/get-bounding-box.ts',
+      environmentVariables: {
+        SPATIAL_DATA_TABLE: spatialDataTable.tableName,
+        PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
+        SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
+        GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
+      },
+    }).lambda;
+    spatialDataTable.grantReadData(this.getBoundingBox);
 
     // Create IAM role for the EventBridge Scheduler
     const schedulerRole = new Role(this, 'WeatherDataSchedulerRole', {

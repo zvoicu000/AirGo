@@ -3,6 +3,33 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
+      "name": "Get Bounding Box",
+      "preLaunchTask": "Build",
+      "invokeTarget": {
+        "target": "code",
+        "architecture": "arm64",
+        "projectRoot": "dist",
+        "lambdaHandler": "queries/get-bounding-box.handler"
+      },
+      "aws": {
+        "region": "eu-west-1"
+      },
+      "lambda": {
+        "runtime": "nodejs22.x",
+        "payload": {
+          "path": "${workspaceFolder}/test/payloads/queries/get-bounding-box-event.json"
+        }
+      },
+      "sam": {
+        "localArguments": [
+          "--container-env-vars",
+          "${workspaceFolder}/local.env.json"
+        ]
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
       "name": "Process Route",
       "preLaunchTask": "Build",
       "invokeTarget": {

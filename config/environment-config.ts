@@ -23,7 +23,9 @@ export interface EnvironmentConfig {
   logLevel: string;
   minifyCodeOnDeployment?: boolean;
   spatialDataTableName?: string;
-  geoHashPrecision?: number;
+  partitionKeyHashPrecision?: number;
+  sortKeyHashPrecision?: number;
+  gsiHashPrecision?: number;
   weatherDataSourceUrl?: string;
   weatherDataTtlSeconds?: number;
 }
@@ -44,7 +46,9 @@ const defaultConfig: EnvironmentConfig = {
   logLevel: 'DEBUG',
   minifyCodeOnDeployment: false,
   spatialDataTableName: 'SpatialDataTable',
-  geoHashPrecision: 5, // Approx 5km resolution for partitioning
+  partitionKeyHashPrecision: 5, // Approx 5km resolution for partitioning
+  sortKeyHashPrecision: 8, // Approx 50m resolution for sorting
+  gsiHashPrecision: 4, // Approx 40km resolution for GSI partitioning
   weatherDataSourceUrl: 'https://aviationweather.gov/data/cache/metars.cache.xml.gz',
   weatherDataTtlSeconds: 14400, // 4 hours in seconds
 };

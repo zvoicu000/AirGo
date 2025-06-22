@@ -100,3 +100,9 @@ Nearly 800k data points in the UK
 Contains data supplied by UK Centre for Ecology & Hydrology.
 
 exploit the Information commercially and non-commercially for example, by combining it with other Information, or by including it in your own product or application.
+
+## Local Development
+
+To run the application locally, you can use the AWS SAM CLI to simulate the Lambda functions. First, ensure you have the AWS SAM CLI installed.
+
+Then, using VSCode, you can invoke and debug the Lambda functions. Launch configurations are provided in the `.vscode/launch.json` file.

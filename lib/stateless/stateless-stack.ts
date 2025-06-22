@@ -8,6 +8,7 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { EnvironmentConfig, Stage } from '@config';
 import { LambdaResources } from './nested/lambda-stack';
+import { ApiResources } from './nested/api-stack';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 
 export interface StatelessStackProps extends StackProps {
@@ -18,6 +19,7 @@ export interface StatelessStackProps extends StackProps {
 
 export class StatelessStack extends Stack {
   public lambdaResources: LambdaResources;
+  public apiResources: ApiResources;
 
   constructor(scope: Construct, id: string, props: StatelessStackProps) {
     super(scope, id, props);
@@ -28,6 +30,15 @@ export class StatelessStack extends Stack {
       stage: stage,
       envConfig: envConfig,
       spatialDataTable: props.spatialDataTable,
+    });
+
+    // Create the API Gateway resources nested stack
+    this.apiResources = new ApiResources(this, 'ApiResources', {
+      stage: stage,
+      envConfig: envConfig,
+      processRoute: this.lambdaResources.processRoute,
+      optimiseRoute: this.lambdaResources.optimiseRoute,
+      getBoundingBox: this.lambdaResources.getBoundingBox,
     });
   }
 }

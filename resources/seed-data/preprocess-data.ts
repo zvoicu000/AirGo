@@ -44,6 +44,7 @@ const BNG = 'EPSG:27700';
 const WGS84 = 'EPSG:4326';
 const PARTITION_KEY_HASH_PRECISION = 5; // GeoHash precision for partition key (approx 5km resolution)
 const SORT_KEY_HASH_PRECISION = 8; // GeoHash precision for sort key (approx 50m resolution)
+const GSI_HASH_PRECISION = 4; // GeoHash precision for GSI partition key (approx 40km resolution)
 const INPUT_FILE = 'resources/seed-data/population-data/input/uk-population-data.tif';
 const OUTPUT_FILE = 'resources/seed-data/population-data/processed/uk-population-data.json.gzip';
 
@@ -144,14 +145,11 @@ async function extractPopulationData(tifPath: string): Promise<void> {
 
       const [lon, lat] = proj4(BNG, WGS84, [easting, northing]);
 
-      const pk = ngeohash.encode(lat, lon, PARTITION_KEY_HASH_PRECISION);
-      const sk = `POP#${ngeohash.encode(lat, lon, SORT_KEY_HASH_PRECISION)}`;
-
       const item = {
-        PK: pk,
-        SK: sk,
-        ...(highInterest && { GSI1PK: pk }),
-        ...(highInterest && { GSI2SK: sk }),
+        PK: ngeohash.encode(lat, lon, PARTITION_KEY_HASH_PRECISION),
+        SK: `POP#${ngeohash.encode(lat, lon, SORT_KEY_HASH_PRECISION)}`,
+        ...(highInterest && { GSI1PK: ngeohash.encode(lat, lon, GSI_HASH_PRECISION) }),
+        ...(highInterest && { GSI1SK: `POP#${ngeohash.encode(lat, lon, SORT_KEY_HASH_PRECISION)}` }),
         type: 'Population',
         lat: Number(lat.toFixed(6)),
         lon: Number(lon.toFixed(6)),
