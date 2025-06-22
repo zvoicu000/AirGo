@@ -48,6 +48,13 @@ const GSI_HASH_PRECISION = 4; // GeoHash precision for GSI partition key (approx
 const INPUT_FILE = 'resources/seed-data/population-data/input/uk-population-data.tif';
 const OUTPUT_FILE = 'resources/seed-data/population-data/processed/uk-population-data.json.gzip';
 
+const areaOfInterest = {
+  minLat: 50.8,
+  maxLat: 55.8,
+  minLon: -3.0,
+  maxLon: 1.8,
+};
+
 /**
  * Calculates the 95th percentile value from an array of population numbers.
  *
@@ -103,6 +110,7 @@ async function extractPopulationData(tifPath: string): Promise<void> {
 
   const processingStats = {
     areasInSourceData: 0,
+    areasWithinAreasOfInterest: 0,
     areasWithNonZeroPopulationData: 0,
     ninetyFifthPercentilePopulation: 0,
     areasWithGreaterThanNinetyFifthPercentilePopulation: 0,
@@ -144,6 +152,19 @@ async function extractPopulationData(tifPath: string): Promise<void> {
       const northing = originY + y * yRes;
 
       const [lon, lat] = proj4(BNG, WGS84, [easting, northing]);
+
+      // If the coordinates are outside the area of interest, skip them
+      // This is done to reduce the number of items written to DynamoDB and save time on initial deployment
+      if (
+        lat < areaOfInterest.minLat ||
+        lat > areaOfInterest.maxLat ||
+        lon < areaOfInterest.minLon ||
+        lon > areaOfInterest.maxLon
+      ) {
+        continue;
+      }
+
+      processingStats.areasWithinAreasOfInterest++;
 
       const item = {
         PK: ngeohash.encode(lat, lon, PARTITION_KEY_HASH_PRECISION),
