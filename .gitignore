@@ -380,7 +380,10 @@ yarn.lock
 cdk.out
 
 ### Typescript specific ignores ###
+# Exclude all JS files except frontend/postcss.config.js
 *.js
+!frontend/postcss.config.js
+!frontend/tailwind.config.js
 !jest.config.js
 *.d.ts
 *.js.map

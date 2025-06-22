@@ -3,6 +3,7 @@ import { NestedStack, NestedStackProps } from 'aws-cdk-lib';
 import { RestApi, LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { EnvironmentConfig, Stage } from '../../../config';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 
 interface ApiResourcesProps extends NestedStackProps {
   stage: Stage;
@@ -10,6 +11,7 @@ interface ApiResourcesProps extends NestedStackProps {
   processRoute: NodejsFunction;
   optimiseRoute: NodejsFunction;
   getBoundingBox: NodejsFunction;
+  allowedOrigins?: string[];
 }
 
 export class ApiResources extends NestedStack {
@@ -24,18 +26,6 @@ export class ApiResources extends NestedStack {
     this.api = new RestApi(this, 'DroneDeliveryApi', {
       restApiName: 'Drone Delivery Service API',
       description: 'API for drone delivery service operations',
-      defaultCorsPreflightOptions: {
-        allowOrigins: ['http://localhost:3000'],
-        allowMethods: ['GET', 'POST', 'OPTIONS'],
-        allowHeaders: [
-          'Content-Type',
-          'Authorization',
-          'X-Amz-Date',
-          'X-Api-Key',
-          'X-Amz-Security-Token',
-          'X-Amz-User-Agent',
-        ],
-      },
     });
 
     // Add routes resource
@@ -54,5 +44,17 @@ export class ApiResources extends NestedStack {
     // Add bounding box query endpoint
     const boundingBox = spatial.addResource('bounding-box');
     boundingBox.addMethod('GET', new LambdaIntegration(getBoundingBox));
+
+    // Save the API URL to the System Manager Parameter Store
+    new StringParameter(this, 'ApiUrlParameter', {
+      parameterName: '/droneServiceApi/apiUrl',
+      stringValue: this.api.url,
+    });
+
+    // Output the API URL
+    this.exportValue(this.api.url, {
+      name: 'ApiUrl',
+      description: 'The URL of the API Gateway for the Drone Delivery Service',
+    });
   }
 }

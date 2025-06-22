@@ -21,7 +21,13 @@ const weatherIcon = new L.Icon({
   popupAnchor: [0, -16],
 });
 
-const API_BASE_URL = 'https://2j0zdcimf7.execute-api.eu-west-1.amazonaws.com/prod/spatial/bounding-box';
+declare global {
+  interface Window {
+    API_BASE_URL: string;
+  }
+}
+
+const API_BASE_URL = window.API_BASE_URL || 'https://2j0zdcimf7.execute-api.eu-west-1.amazonaws.com/prod/spatial/bounding-box';
 
 const MapView: React.FC = () => {
   const [mapData, setMapData] = useState<ApiResponse | null>(null);
