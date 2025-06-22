@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Rectangle, Marker, Popup, useMapEvents } from 
 import L from 'leaflet';
 import { ApiResponse, PopulationData, WeatherData } from '../types';
 import WeatherPopup from './WeatherPopup';
+import FlightPlanner from './FlightPlanner';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -29,7 +30,12 @@ declare global {
 
 const API_BASE_URL = window.API_BASE_URL || 'https://2j0zdcimf7.execute-api.eu-west-1.amazonaws.com/prod/spatial/bounding-box';
 
-const MapView: React.FC = () => {
+interface MapViewProps {
+  isFlightPlannerActive: boolean;
+  onCloseFlightPlanner: () => void;
+}
+
+const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightPlanner }) => {
   const [mapData, setMapData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -126,10 +132,15 @@ const MapView: React.FC = () => {
       <MapContainer center={[51.25, -0.6]} zoom={12} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
         />
 
         <MapEvents />
+        
+        <FlightPlanner 
+          isActive={isFlightPlannerActive} 
+          onClose={onCloseFlightPlanner}
+        />
 
         {mapData?.items.map((item, index) => {
           if (item.type === 'Population') {

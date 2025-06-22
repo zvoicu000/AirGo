@@ -35,7 +35,7 @@ describe('optimise-route', () => {
     expect(JSON.parse(result.body).message).toBe('Missing bounding box parameters.');
   });
 
-  it('should optimize route to avoid populated areas', async () => {
+  it('should optimise route to avoid populated areas', async () => {
     // Mock spatial data with some population points
     const mockPopulationData = [
       { 

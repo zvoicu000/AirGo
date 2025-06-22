@@ -21,10 +21,10 @@ const ANGLE_RANGE = 30; // Maximum deviation angle in degrees
 const SEARCH_ITERATIONS = 10; // Number of angles to try at each step
 
 /**
- * Finds an optimized route between two points that minimizes exposure to populated areas.
+ * Finds an optimised route between two points that minimizes exposure to populated areas.
  * Uses a step-by-step approach, evaluating multiple possible directions at each step.
  */
-async function findOptimizedRoute(startPoint: Point, endPoint: Point, spatialData: any[]): Promise<Point[]> {
+async function findOptimisedRoute(startPoint: Point, endPoint: Point, spatialData: any[]): Promise<Point[]> {
   const route: Point[] = [startPoint];
   let currentPoint = startPoint;
 
@@ -64,17 +64,27 @@ async function findOptimizedRoute(startPoint: Point, endPoint: Point, spatialDat
   return route;
 }
 
-interface RouteEvent {
-  latStart: number;
-  lonStart: number;
-  latEnd: number;
-  lonEnd: number;
-}
-
-export const handler = async (event: RouteEvent) => {
-  const { latStart, lonStart, latEnd, lonEnd } = event;
+export const handler = async (event: any) => {
   logger.info('Processing Drone Operation Proposed Route', { event });
 
+  // If this is processing a request from API Gateway, the parameters will be in the event object
+  if (event.body) {
+    try {
+      const body = JSON.parse(event.body);
+      event.latStart = body.latStart;
+      event.lonStart = body.lonStart;
+      event.latEnd = body.latEnd;
+      event.lonEnd = body.lonEnd;
+    } catch (err) {
+      logger.error('Error parsing request body', { error: err });
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: 'Invalid request body.' }),
+      };
+    }
+  }
+
+  const { latStart, lonStart, latEnd, lonEnd } = event;
   if ([latStart, lonStart, latEnd, lonEnd].some((v) => v === undefined)) {
     return {
       statusCode: 400,
@@ -117,21 +127,21 @@ export const handler = async (event: RouteEvent) => {
   }
   logger.info('Queried Results from GeoHashes', { count: results.length });
 
-  // Step 3: Find optimized route
-  const optimizedRoute = await findOptimizedRoute(startPoint, endPoint, results);
-  logger.info('Optimized Route Generated', {
-    numberOfPoints: optimizedRoute.length,
-    totalDistance: optimizedRoute.reduce((sum, point, i) => {
+  // Step 3: Find optimised route
+  const optimisedRoute = await findOptimisedRoute(startPoint, endPoint, results);
+  logger.info('Optimised Route Generated', {
+    numberOfPoints: optimisedRoute.length,
+    totalDistance: optimisedRoute.reduce((sum, point, i) => {
       if (i === 0) return 0;
-      return sum + getDistance(optimizedRoute[i - 1], point);
+      return sum + getDistance(optimisedRoute[i - 1], point);
     }, 0),
   });
 
-  // Step 4: Evaluate the optimized route
+  // Step 4: Evaluate the optimised route
   let totalPopulationImpact = 0;
-  for (let i = 0; i < optimizedRoute.length - 1; i++) {
-    const segmentStart = optimizedRoute[i];
-    const segmentEnd = optimizedRoute[i + 1];
+  for (let i = 0; i < optimisedRoute.length - 1; i++) {
+    const segmentStart = optimisedRoute[i];
+    const segmentEnd = optimisedRoute[i + 1];
     const nearbyPoints = getPointsNearRoute(segmentStart, segmentEnd, results);
     const segmentPopulation = nearbyPoints
       .filter((p) => p.type === 'Population')
@@ -141,14 +151,23 @@ export const handler = async (event: RouteEvent) => {
 
   logger.info('Route Evaluation Complete', {
     totalPopulationImpact: Math.round(totalPopulationImpact),
-    routePoints: optimizedRoute,
+    routePoints: optimisedRoute,
   });
 
   return {
     statusCode: 200,
     body: JSON.stringify({
-      route: optimizedRoute,
+      route: optimisedRoute,
       populationImpact: Math.round(totalPopulationImpact),
     }),
+    isBase64Encoded: false,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers':
+        'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'OPTIONS,GET,PUT,POST,DELETE',
+    },
   };
 };
