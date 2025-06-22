@@ -1,6 +1,128 @@
 {
-  "latMin": 51.211,
-  "lonMin": -0.782,
-  "latMax": 51.313,
-  "lonMax": -0.4666
+  "resource": "/spatial/bounding-box",
+  "path": "/spatial/bounding-box",
+  "httpMethod": "GET",
+  "headers": {
+    "Accept": "*/*",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-ASN": "207645",
+    "CloudFront-Viewer-Country": "GB",
+    "Host": "i130uatty4.execute-api.eu-west-1.amazonaws.com",
+    "User-Agent": "curl/8.7.1",
+    "Via": "2.0 6dcfe970273dbabb7e3f096812b664f4.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Id": "SE8iRdhtTHGuE-xdzjRmeqTxeVAdBYiIBLYgy35F387BdBtsiEd5Vw==",
+    "X-Amzn-Trace-Id": "Root=1-6857fe31-51c9de04747f50d851b0ba72",
+    "X-Forwarded-For": "194.120.133.60, 15.158.16.244",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "multiValueHeaders": {
+    "Accept": [
+      "*/*"
+    ],
+    "CloudFront-Forwarded-Proto": [
+      "https"
+    ],
+    "CloudFront-Is-Desktop-Viewer": [
+      "true"
+    ],
+    "CloudFront-Is-Mobile-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-SmartTV-Viewer": [
+      "false"
+    ],
+    "CloudFront-Is-Tablet-Viewer": [
+      "false"
+    ],
+    "CloudFront-Viewer-ASN": [
+      "207645"
+    ],
+    "CloudFront-Viewer-Country": [
+      "GB"
+    ],
+    "Host": [
+      "i130uatty4.execute-api.eu-west-1.amazonaws.com"
+    ],
+    "User-Agent": [
+      "curl/8.7.1"
+    ],
+    "Via": [
+      "2.0 6dcfe970273dbabb7e3f096812b664f4.cloudfront.net (CloudFront)"
+    ],
+    "X-Amz-Cf-Id": [
+      "SE8iRdhtTHGuE-xdzjRmeqTxeVAdBYiIBLYgy35F387BdBtsiEd5Vw=="
+    ],
+    "X-Amzn-Trace-Id": [
+      "Root=1-6857fe31-51c9de04747f50d851b0ba72"
+    ],
+    "X-Forwarded-For": [
+      "194.120.133.60, 15.158.16.244"
+    ],
+    "X-Forwarded-Port": [
+      "443"
+    ],
+    "X-Forwarded-Proto": [
+      "https"
+    ]
+  },
+  "queryStringParameters": {
+    "latMax": "51.313",
+    "latMin": "51.211",
+    "lonMax": "-0.4666",
+    "lonMin": "-0.782"
+  },
+  "multiValueQueryStringParameters": {
+    "latMax": [
+      "51.313"
+    ],
+    "latMin": [
+      "51.211"
+    ],
+    "lonMax": [
+      "-0.4666"
+    ],
+    "lonMin": [
+      "-0.782"
+    ]
+  },
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourceId": "37iz1i",
+    "resourcePath": "/spatial/bounding-box",
+    "httpMethod": "GET",
+    "extendedRequestId": "MkSn2E3ajoEEXjA=",
+    "requestTime": "22/Jun/2025:12:59:29 +0000",
+    "path": "/prod/spatial/bounding-box",
+    "accountId": "856511401652",
+    "protocol": "HTTP/1.1",
+    "stage": "prod",
+    "domainPrefix": "i130uatty4",
+    "requestTimeEpoch": 1750597169831,
+    "requestId": "8284fd6a-c88b-49ce-bf7b-00e2f95c5bd7",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "sourceIp": "194.120.133.60",
+      "principalOrgId": null,
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "curl/8.7.1",
+      "user": null
+    },
+    "domainName": "i130uatty4.execute-api.eu-west-1.amazonaws.com",
+    "deploymentId": "exrox6",
+    "apiId": "i130uatty4"
+  },
+  "body": null,
+  "isBase64Encoded": false
 }

@@ -6,7 +6,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import * as geohash from 'ngeohash';
-import { logger, chunkArray, BoundingBox } from '../shared';
+import { logger, chunkArray } from '../shared';
 
 const client = new DynamoDBClient({});
 const ddb = DynamoDBDocumentClient.from(client);
@@ -15,9 +15,27 @@ const ddb = DynamoDBDocumentClient.from(client);
 const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
 const GSI_HASH_PRECISION = parseFloat(process.env.GSI_HASH_PRECISION || '4');
 
-export const handler = async (event: BoundingBox) => {
-  const { latMin, lonMin, latMax, lonMax } = event;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const handler = async (event: any) => {
   logger.info('Processing Bounding Box Query', { event });
+
+  // If the bounding box parameters are in the queryStringParameters, set them now
+  if (event.queryStringParameters) {
+    const {
+      latMin: queryLatMin,
+      lonMin: queryLonMin,
+      latMax: queryLatMax,
+      lonMax: queryLonMax,
+    } = event.queryStringParameters;
+    if (queryLatMin && queryLonMin && queryLatMax && queryLonMax) {
+      event.latMin = parseFloat(queryLatMin);
+      event.lonMin = parseFloat(queryLonMin);
+      event.latMax = parseFloat(queryLatMax);
+      event.lonMax = parseFloat(queryLonMax);
+    }
+  }
+
+  const { latMin, lonMin, latMax, lonMax } = event;
 
   if ([latMin, lonMin, latMax, lonMax].some((v) => v === undefined)) {
     return {
