@@ -92,9 +92,6 @@
         "projectRoot": "dist",
         "lambdaHandler": "data-loading/load-weather-data.handler"
       },
-      "aws": {
-        "region": "eu-west-1"
-      },
       "lambda": {
         "runtime": "nodejs22.x",
         "payload": {

@@ -13,7 +13,7 @@ const ddb = DynamoDBDocumentClient.from(client);
 
 // Load environment variables
 const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
-const GEOHASH_PRECISION = parseFloat(process.env.GEOHASH_PRECISION || '5');
+const GSI_HASH_PRECISION = parseFloat(process.env.GSI_HASH_PRECISION || '4');
 
 export const handler = async (event: BoundingBox) => {
   const { latMin, lonMin, latMax, lonMax } = event;
@@ -27,7 +27,7 @@ export const handler = async (event: BoundingBox) => {
   }
 
   // Step 1: Get all GeoHash prefixes covering the bounding box
-  const hashPrefixes = geohash.bboxes(latMin, lonMin, latMax, lonMax, GEOHASH_PRECISION);
+  const hashPrefixes = geohash.bboxes(latMin, lonMin, latMax, lonMax, GSI_HASH_PRECISION);
   logger.info('Geohash Prefixes intercepting the bounding box', { count: hashPrefixes.length });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

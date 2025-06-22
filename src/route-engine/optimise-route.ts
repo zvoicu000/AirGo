@@ -15,7 +15,7 @@ const ddb = DynamoDBDocumentClient.from(client);
 
 // Load environment variables
 const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
-const GEOHASH_PRECISION = parseFloat(process.env.GEOHASH_PRECISION || '5');
+const PARTITION_KEY_HASH_PRECISION = parseFloat(process.env.PARTITION_KEY_HASH_PRECISION || '5');
 const STEP_DISTANCE = 1000; // Distance in meters for each step
 const ANGLE_RANGE = 30; // Maximum deviation angle in degrees
 const SEARCH_ITERATIONS = 10; // Number of angles to try at each step
@@ -86,7 +86,7 @@ export const handler = async (event: RouteEvent) => {
   const endPoint: Point = { lat: latEnd, lon: lonEnd };
 
   // Step 1: Get all GeoHash prefixes covering the bounding box
-  const hashPrefixes = getRouteGeoHashes(startPoint, endPoint, GEOHASH_PRECISION);
+  const hashPrefixes = getRouteGeoHashes(startPoint, endPoint, PARTITION_KEY_HASH_PRECISION);
   logger.info('Geohash Prefixes intercepting the route', { count: hashPrefixes.length });
 
   const results: any[] = [];
