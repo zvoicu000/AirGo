@@ -1,0 +1,85 @@
+{
+  "configurations": [
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "Process Route",
+      "preLaunchTask": "Build",
+      "invokeTarget": {
+        "target": "code",
+        "architecture": "arm64",
+        "projectRoot": "dist",
+        "lambdaHandler": "route-engine/process-route.handler"
+      },
+      "aws": {
+        "region": "eu-west-1"
+      },
+      "lambda": {
+        "runtime": "nodejs22.x",
+        "payload": {
+          "path": "${workspaceFolder}/test/payloads/route-engine/process-route-event.json"
+        }
+      },
+      "sam": {
+        "localArguments": [
+          "--container-env-vars",
+          "${workspaceFolder}/local.env.json"
+        ]
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "Optimise Route",
+      "preLaunchTask": "Build",
+      "invokeTarget": {
+        "target": "code",
+        "architecture": "arm64",
+        "projectRoot": "dist",
+        "lambdaHandler": "route-engine/optimise-route.handler"
+      },
+      "aws": {
+        "region": "eu-west-1"
+      },
+      "lambda": {
+        "runtime": "nodejs22.x",
+        "payload": {
+          "path": "${workspaceFolder}/test/payloads/route-engine/optimise-route-event.json"
+        }
+      },
+      "sam": {
+        "localArguments": [
+          "--container-env-vars",
+          "${workspaceFolder}/local.env.json"
+        ]
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "Load Weather Data",
+      "preLaunchTask": "Build",
+      "invokeTarget": {
+        "target": "code",
+        "architecture": "arm64",
+        "projectRoot": "dist",
+        "lambdaHandler": "data-loading/load-weather-data.handler"
+      },
+      "aws": {
+        "region": "eu-west-1"
+      },
+      "lambda": {
+        "runtime": "nodejs22.x",
+        "payload": {
+          "path": "${workspaceFolder}/test/payloads/data-loading/load-weather-data-event.json"
+        }
+      },
+      "sam": {
+        "localArguments": [
+          "--container-env-vars",
+          "${workspaceFolder}/local.env.json"
+        ]
+      }
+    }
+  ]
+}

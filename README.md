@@ -17,7 +17,7 @@ The platform consists of several key components:
 ├── bin/                    # Entry point for CDK app
 ├── config/                 # Environment and pipeline configurations
 ├── lib/                    # Core CDK stack definitions
-│   ├── constructs/         # Reusable CDK constructs such as custom Lambda function
+│   ├── constructs/         # Reusable CDK constructs such as custom Lambda function and DynamoDB table
 ├── src/                    # Source code for the application (e.g. Lambda function Code)
 ├── stateful/             
 │   ├── nested/             # Nested stacks of stateful resources
@@ -78,20 +78,24 @@ The infrastructure and application deployment is managed through CodePipeline. T
 
 ## Getting Started
 
-npm install
+Set the region in `config/types.ts`. This is the region where the resources will be deployed. The default is `eu-west-1`.
 
-Set the region in `config/types.ts`
-
+Ensure you have the AWS CDK CLI installed and configured with your AWS credentials targeting the correct AWS account. Ensure the AWS account is bootstrapped for CDK usage:
+```bash
 cdk bootstrap --region eu-west-1
+```
 
-cdk deploy --all
+Then install the dependencies and deploy the application:
+```bash
+npm install
+npm run deploy
+```
 
-Initial deployment will take some time as it seeds the DynamoDB table with initial data.
+> Please note that the initial deployment will take some time as it seeds the DynamoDB table with initial data.
+
 There is limited cost as this is seeded directly from S3 rather than using Put operations.
 
-
 Nearly 800k data points in the UK
-
 
 Contains data supplied by UK Centre for Ecology & Hydrology.
 
