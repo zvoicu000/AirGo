@@ -24,6 +24,18 @@ export class ApiResources extends NestedStack {
     this.api = new RestApi(this, 'DroneDeliveryApi', {
       restApiName: 'Drone Delivery Service API',
       description: 'API for drone delivery service operations',
+      defaultCorsPreflightOptions: {
+        allowOrigins: ['http://localhost:3000'],
+        allowMethods: ['GET', 'POST', 'OPTIONS'],
+        allowHeaders: [
+          'Content-Type',
+          'Authorization',
+          'X-Amz-Date',
+          'X-Api-Key',
+          'X-Amz-Security-Token',
+          'X-Amz-User-Agent',
+        ],
+      },
     });
 
     // Add routes resource

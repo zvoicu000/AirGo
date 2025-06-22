@@ -101,6 +101,14 @@ Contains data supplied by UK Centre for Ecology & Hydrology.
 
 exploit the Information commercially and non-commercially for example, by combining it with other Information, or by including it in your own product or application.
 
+## Front End
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
 ## Local Development
 
 To run the application locally, you can use the AWS SAM CLI to simulate the Lambda functions. First, ensure you have the AWS SAM CLI installed.

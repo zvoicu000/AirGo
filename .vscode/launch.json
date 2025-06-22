@@ -11,9 +11,6 @@
         "projectRoot": "dist",
         "lambdaHandler": "queries/get-bounding-box.handler"
       },
-      "aws": {
-        "region": "eu-west-1"
-      },
       "lambda": {
         "runtime": "nodejs22.x",
         "payload": {
@@ -38,9 +35,6 @@
         "projectRoot": "dist",
         "lambdaHandler": "route-engine/process-route.handler"
       },
-      "aws": {
-        "region": "eu-west-1"
-      },
       "lambda": {
         "runtime": "nodejs22.x",
         "payload": {
@@ -64,9 +58,6 @@
         "architecture": "arm64",
         "projectRoot": "dist",
         "lambdaHandler": "route-engine/optimise-route.handler"
-      },
-      "aws": {
-        "region": "eu-west-1"
       },
       "lambda": {
         "runtime": "nodejs22.x",

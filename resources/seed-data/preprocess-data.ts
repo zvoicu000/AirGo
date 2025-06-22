@@ -37,7 +37,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 // Manually define EPSG:27700 (British National Grid)
 proj4.defs(
   'EPSG:27700',
-  '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 +units=m +no_defs',
+  '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs',
 );
 
 const BNG = 'EPSG:27700';
@@ -123,6 +123,9 @@ async function extractPopulationData(tifPath: string): Promise<void> {
   const [originX, originY] = origin;
   const [xRes, yRes] = resolution;
 
+  // Log the metadata of the raster
+  console.log({ origin, resolution, bbox: image.getBoundingBox() });
+
   // Output file to gzip format
   const fileStream = fs.createWriteStream(OUTPUT_FILE, { flags: 'w' });
   const gzipStream = zlib.createGzip();
@@ -148,8 +151,8 @@ async function extractPopulationData(tifPath: string): Promise<void> {
       const highInterest = value > population95thPercentile;
       if (highInterest) processingStats.areasWithGreaterThanNinetyFifthPercentilePopulation++;
 
-      const easting = originX + x * xRes;
-      const northing = originY + y * yRes;
+      const easting = originX + (x + 0.5) * xRes;
+      const northing = originY + (y + 0.5) * yRes;
 
       const [lon, lat] = proj4(BNG, WGS84, [easting, northing]);
 
