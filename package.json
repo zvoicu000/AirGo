@@ -2,7 +2,7 @@
   "name": "drone-delivery-service",
   "version": "0.1.0",
   "bin": {
-    "drone-delivery-service": "bin/drone-delivery-service.ts"
+    "drone-delivery-service": "bin/drone-delivery-service-backend.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -11,7 +11,9 @@
     "test": "jest",
     "cdk": "cdk",
     "synth": "cdk synth --all",
-    "deploy": "npm --prefix frontend run build && cdk deploy --all --require-approval never",
+    "deploy": "npm run deploy:backend && npm run deploy:frontend",
+    "deploy:backend": "cdk deploy --all --require-approval never",
+    "deploy:frontend": "npm --prefix frontend run build && cdk deploy --app='npx ts-node --prefer-ts-exts bin/drone-delivery-service-frontend.ts' --require-approval never",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:unit": "jest",

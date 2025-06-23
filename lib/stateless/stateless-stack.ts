@@ -9,7 +9,6 @@ import { Construct } from 'constructs';
 import { EnvironmentConfig, Stage } from '@config';
 import { LambdaResources } from './nested/lambda-stack';
 import { ApiResources } from './nested/api-stack';
-import { FrontendResources } from './nested/frontend-stack';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 
 export interface StatelessStackProps extends StackProps {
@@ -21,7 +20,6 @@ export interface StatelessStackProps extends StackProps {
 export class StatelessStack extends Stack {
   public lambdaResources: LambdaResources;
   public apiResources: ApiResources;
-  public frontendResources: FrontendResources;
 
   constructor(scope: Construct, id: string, props: StatelessStackProps) {
     super(scope, id, props);
@@ -41,13 +39,6 @@ export class StatelessStack extends Stack {
       processRoute: this.lambdaResources.processRoute,
       optimiseRoute: this.lambdaResources.optimiseRoute,
       getBoundingBox: this.lambdaResources.getBoundingBox,
-    });
-
-    // Create the frontend resources nested stack first
-    this.frontendResources = new FrontendResources(this, 'FrontendResources', {
-      stage: stage,
-      envConfig: envConfig,
-      api: this.apiResources.api,
     });
   }
 }

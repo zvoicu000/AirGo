@@ -378,6 +378,7 @@ $RECYCLE.BIN/
 yarn.lock
 .cdk.staging
 cdk.out
+cdk.out.frontend
 
 ### Typescript specific ignores ###
 # Exclude all JS files except frontend/postcss.config.js

@@ -1,20 +1,18 @@
 import { Construct } from 'constructs';
-import { NestedStack, NestedStackProps, RemovalPolicy } from 'aws-cdk-lib';
-import { RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Distribution, OriginAccessIdentity, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
-import { EnvironmentConfig, Stage } from '../../../config';
+import { EnvironmentConfig, Stage } from '../../config';
 import * as path from 'path';
 
-interface FrontendResourcesProps extends NestedStackProps {
+interface FrontendResourcesProps extends StackProps {
   stage: Stage;
   envConfig: EnvironmentConfig;
-  api: RestApi;
 }
 
-export class FrontendResources extends NestedStack {
+export class FrontendStack extends Stack {
   public distribution: Distribution;
 
   constructor(scope: Construct, id: string, props: FrontendResourcesProps) {
@@ -51,7 +49,7 @@ export class FrontendResources extends NestedStack {
     // Deploy the React application to S3
     new BucketDeployment(this, 'WebsiteDeployment', {
       sources: [
-        Source.asset(path.join(__dirname, '../../../frontend/build'), {
+        Source.asset(path.join(__dirname, '../../frontend/build'), {
           exclude: ['config.js'],
         }),
       ],
@@ -60,9 +58,6 @@ export class FrontendResources extends NestedStack {
       distributionPaths: ['/*'],
       prune: true,
     });
-
-    // Create a Lambda function that will update the S3 bucket with the API URL dynamically
-    // This is because the API URL is not available until the deployment is completed
 
     // Create config.js with dynamic API URL
     // new BucketDeployment(this, 'ConfigDeployment', {
