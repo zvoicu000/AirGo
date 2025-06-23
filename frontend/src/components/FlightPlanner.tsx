@@ -57,9 +57,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
 
     setIsCalculating(true);
     try {
-      const API_BASE_URL = window.API_BASE_URL?.replace('/spatial/bounding-box', '') || 
-        'https://2j0zdcimf7.execute-api.eu-west-1.amazonaws.com/prod';
-      
+      const API_BASE_URL = window.API_BASE_URL;
       const response = await fetch(`${API_BASE_URL}/routes/optimise`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

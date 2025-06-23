@@ -1,11 +1,14 @@
 import { Construct } from 'constructs';
-import { Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib';
+import { Stack, StackProps, RemovalPolicy, CustomResource } from 'aws-cdk-lib';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Distribution, OriginAccessIdentity, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { EnvironmentConfig, Stage } from '../../config';
+import { CustomLambda } from '../constructs';
 import * as path from 'path';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Provider } from 'aws-cdk-lib/custom-resources';
 
 interface FrontendResourcesProps extends StackProps {
   stage: Stage;
@@ -59,26 +62,38 @@ export class FrontendStack extends Stack {
       prune: true,
     });
 
-    // Create config.js with dynamic API URL
-    // new BucketDeployment(this, 'ConfigDeployment', {
-    //   sources: [Source.data('config.js', `window.API_BASE_URL = '${props.api.url}';`)],
-    //   destinationBucket: websiteBucket,
-    //   distribution: this.distribution,
-    //   distributionPaths: ['/config.js'],
-    // });
+    // Create a Lambda function that will perform post deployment actions to update the API URL in the config.js file
+    const frontendPostDeploymentActionFunction = new CustomLambda(this, 'FrontendPostDeploymentActionFunction', {
+      envConfig: props.envConfig,
+      source: 'src/deployment/frontend-deployment-actions.ts',
+      environmentVariables: {
+        API_URL_PARAMETER_NAME: props.envConfig.apiUrlParameterName,
+        WEBSITE_BUCKET_NAME: websiteBucket.bucketName,
+      },
+    }).lambda;
 
-    // Add CORS preflight configuration for the API
-    // props.api.root.addCorsPreflight({
-    //   allowOrigins: [`https://${this.distribution.distributionDomainName}`, 'http://localhost:3000'],
-    //   allowMethods: ['GET', 'POST', 'OPTIONS'],
-    //   allowHeaders: [
-    //     'Content-Type',
-    //     'Authorization',
-    //     'X-Amz-Date',
-    //     'X-Api-Key',
-    //     'X-Amz-Security-Token',
-    //     'X-Amz-User-Agent',
-    //   ],
-    // });
+    // Grant the Lambda function permissions to read the API URL from SSM and write to the S3 bucket
+    frontendPostDeploymentActionFunction.addToRolePolicy(
+      new PolicyStatement({
+        actions: ['ssm:GetParameter'],
+        resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter${props.envConfig.apiUrlParameterName}`],
+      }),
+    );
+    websiteBucket.grantWrite(frontendPostDeploymentActionFunction);
+
+    // Invoke the Lambda function as a post-deployment action
+    const provider = new Provider(this, 'ConfigUploaderProvider', {
+      onEventHandler: frontendPostDeploymentActionFunction,
+    });
+
+    new CustomResource(this, 'PerformFrontendPostDeploymentActions', {
+      serviceToken: provider.serviceToken,
+    });
+
+    // Output the CloudFront distribution domain name
+    this.exportValue(this.distribution.distributionDomainName, {
+      name: 'CloudFrontDistributionDomainName',
+      description: 'The domain name of the CloudFront distribution for the Drone Delivery Service',
+    });
   }
 }

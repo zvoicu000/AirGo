@@ -27,7 +27,7 @@ export class ApiResources extends NestedStack {
       restApiName: 'Drone Delivery Service API',
       description: 'API for drone delivery service operations',
       defaultCorsPreflightOptions: {
-        allowOrigins: ['http://localhost:3000'],
+        allowOrigins: ['*'],
         allowMethods: ['GET', 'POST', 'OPTIONS'],
         allowHeaders: [
           'Content-Type',
@@ -59,7 +59,7 @@ export class ApiResources extends NestedStack {
 
     // Save the API URL to the System Manager Parameter Store
     new StringParameter(this, 'ApiUrlParameter', {
-      parameterName: '/droneServiceApi/apiUrl',
+      parameterName: props.envConfig.apiUrlParameterName || '/droneServiceApi/apiUrl',
       stringValue: this.api.url,
     });
 

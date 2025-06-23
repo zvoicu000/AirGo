@@ -14,6 +14,7 @@
     "deploy": "npm run deploy:backend && npm run deploy:frontend",
     "deploy:backend": "cdk deploy --all --require-approval never",
     "deploy:frontend": "npm --prefix frontend run build && cdk deploy --app='npx ts-node --prefer-ts-exts bin/drone-delivery-service-frontend.ts' --require-approval never",
+    "destroy": "cdk destroy --app='npx ts-node --prefer-ts-exts bin/drone-delivery-service-frontend.ts && cdk destroy --all",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:unit": "jest",
@@ -22,6 +23,8 @@
   "devDependencies": {
     "@aws-lambda-powertools/logger": "^2.21.0",
     "@aws-sdk/client-dynamodb": "^3.830.0",
+    "@aws-sdk/client-s3": "^3.832.0",
+    "@aws-sdk/client-ssm": "^3.830.0",
     "@aws-sdk/lib-dynamodb": "^3.830.0",
     "@aws-sdk/util-dynamodb": "^3.830.0",
     "@eslint/js": "^9.29.0",

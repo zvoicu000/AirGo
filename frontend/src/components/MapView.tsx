@@ -28,7 +28,7 @@ declare global {
   }
 }
 
-const API_BASE_URL = window.API_BASE_URL || 'https://2j0zdcimf7.execute-api.eu-west-1.amazonaws.com/prod/spatial/bounding-box';
+const API_BASE_URL = window.API_BASE_URL;
 
 interface MapViewProps {
   isFlightPlannerActive: boolean;
@@ -56,7 +56,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
     try {
       const southWest = bounds.getSouthWest();
       const northEast = bounds.getNorthEast();
-      const url = `${API_BASE_URL}?latMin=${southWest.lat}&lonMin=${southWest.lng}&latMax=${northEast.lat}&lonMax=${northEast.lng}`;
+      const url = `${API_BASE_URL}/spatial/bounding-box?latMin=${southWest.lat}&lonMin=${southWest.lng}&latMax=${northEast.lat}&lonMax=${northEast.lng}`;
 
       const response = await fetch(url);
 
