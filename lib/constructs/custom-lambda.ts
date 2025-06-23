@@ -65,7 +65,7 @@ interface CustomLambdaProps extends NodejsFunctionProps {
 
 // Default properties for the Lambda function
 const defaultLambdaProps = {
-  memorySize: 512,
+  memorySize: 1024,
   timeout: Duration.seconds(60),
   handler: 'handler',
   environmentVariables: {},
