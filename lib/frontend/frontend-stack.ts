@@ -2,8 +2,8 @@ import { Construct } from 'constructs';
 import { Stack, StackProps, RemovalPolicy, CustomResource } from 'aws-cdk-lib';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
-import { Distribution, OriginAccessIdentity, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
-import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { Distribution, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
+import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { EnvironmentConfig, Stage } from '../../config';
 import { CustomLambda } from '../constructs';
 import * as path from 'path';
@@ -27,17 +27,11 @@ export class FrontendStack extends Stack {
       autoDeleteObjects: true,
     });
 
-    // Create an Origin Access Identity for CloudFront
-    const originAccessIdentity = new OriginAccessIdentity(this, 'OriginAccessIdentity');
-    websiteBucket.grantRead(originAccessIdentity);
-
     // Create CloudFront distribution
     this.distribution = new Distribution(this, 'DroneServiceWebsiteDistribution', {
       defaultRootObject: 'index.html',
       defaultBehavior: {
-        origin: new S3Origin(websiteBucket, {
-          originAccessIdentity,
-        }),
+        origin: S3BucketOrigin.withOriginAccessControl(websiteBucket),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       errorResponses: [
@@ -59,7 +53,7 @@ export class FrontendStack extends Stack {
       destinationBucket: websiteBucket,
       distribution: this.distribution,
       distributionPaths: ['/*'],
-      prune: true,
+      prune: false,
     });
 
     // Create a Lambda function that will perform post deployment actions to update the API URL in the config.js file
