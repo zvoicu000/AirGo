@@ -40,5 +40,11 @@ export class StatelessStack extends Stack {
       optimiseRoute: this.lambdaResources.optimiseRoute,
       getBoundingBox: this.lambdaResources.getBoundingBox,
     });
+
+    // Output the API URL
+    this.exportValue(this.apiResources.api.url, {
+      name: 'ApiUrl',
+      description: 'The URL of the API Gateway for the Drone Delivery Service',
+    });
   }
 }

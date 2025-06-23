@@ -62,11 +62,5 @@ export class ApiResources extends NestedStack {
       parameterName: props.envConfig.apiUrlParameterName || '/droneServiceApi/apiUrl',
       stringValue: this.api.url,
     });
-
-    // Output the API URL
-    this.exportValue(this.api.url, {
-      name: 'ApiUrl',
-      description: 'The URL of the API Gateway for the Drone Delivery Service',
-    });
   }
 }

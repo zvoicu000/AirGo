@@ -53,7 +53,7 @@ export class FrontendStack extends Stack {
     new BucketDeployment(this, 'WebsiteDeployment', {
       sources: [
         Source.asset(path.join(__dirname, '../../frontend/build'), {
-          exclude: ['config.js'],
+          exclude: ['config.js', 'config.js.example'],
         }),
       ],
       destinationBucket: websiteBucket,

@@ -103,11 +103,17 @@ exploit the Information commercially and non-commercially for example, by combin
 
 ## Front End
 
+Frontend is deployed as a static website to S3 and served through CloudFront. The frontend is built using React and communicates with the backend via API Gateway. is located in the `frontend` directory.
+
+To run the frontend locally, navigate to the `frontend` directory and run the following commands:
+
 ```bash
 cd frontend
 npm install
 npm start
 ```
+
+You will need to set the API endpoint in the frontend code to point to the deployed API Gateway. This can be done in the `frontend/public/config.js` file. An example configuration is provided in `frontend/public/config.example.js`. Copy this file to `config.js` and update the API endpoint to match your deployed API Gateway URL.
 
 ## Local Development
 
