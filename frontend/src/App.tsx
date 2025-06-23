@@ -6,7 +6,7 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <header className="absolute top-0 left-0 right-0 z-[1000] bg-white shadow-md">
+      <header className="fixed top-0 left-0 right-0 z-[1000] bg-white/70 backdrop-blur-md shadow-md">
         <div className="px-6 py-4 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Drone Planner</h1>
@@ -20,12 +20,12 @@ const App: React.FC = () => {
                 : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
             }`}
           >
-            {isFlightPlannerActive ? 'Exit Flight Planner' : 'Create Flight'}
+            {isFlightPlannerActive ? 'Close Flight Planner' : 'Open Flight Planner'}
           </button>
         </div>
       </header>
       
-      <main className="pt-20">
+      <main className="h-screen">
         <MapView isFlightPlannerActive={isFlightPlannerActive} onCloseFlightPlanner={() => setIsFlightPlannerActive(false)} />
       </main>
     </div>

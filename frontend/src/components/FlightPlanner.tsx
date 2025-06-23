@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Marker, Popup, Polyline, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import Spinner from './Spinner';
 
 // Custom icons for start and end markers
 const startIcon = new L.Icon({
@@ -94,6 +95,8 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
   return (
     <>
       <MapClickHandler />
+      
+      {isCalculating && <Spinner size="lg" />}
       
       {/* Flight Planning Panel */}
       <div className="absolute top-24 left-4 z-[1000] bg-white rounded-lg shadow-lg p-4 w-80">
