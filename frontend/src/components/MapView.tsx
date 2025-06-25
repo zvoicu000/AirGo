@@ -254,12 +254,6 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
           return null;
         })}
       </MapContainer>
-
-      {mapData && (
-        <div className="absolute bottom-4 left-4 z-[1000] bg-white px-3 py-2 rounded shadow-lg">
-          <span className="text-sm text-gray-600">{mapData.count} items displayed</span>
-        </div>
-      )}
     </div>
   );
 };

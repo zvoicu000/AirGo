@@ -19,20 +19,19 @@ const PARTITION_KEY_HASH_PRECISION = parseFloat(process.env.PARTITION_KEY_HASH_P
 export const handler = async (event: any) => {
   logger.info('Processing Drone Operation Proposed Route', { event });
 
-  // If this is processing a request from API Gateway, the parameters will be in the event object
-  if (event.body) {
-    try {
-      const body = JSON.parse(event.body);
-      event.latStart = body.latStart;
-      event.lonStart = body.lonStart;
-      event.latEnd = body.latEnd;
-      event.lonEnd = body.lonEnd;
-    } catch (err) {
-      logger.error('Error parsing request body', { error: err });
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Invalid request body.' }),
-      };
+  // If the bounding box parameters are in the queryStringParameters, set them now
+  if (event.queryStringParameters) {
+    const {
+      latStart: queryLatStart,
+      lonStart: queryLonStart,
+      latEnd: queryLatEnd,
+      lonEnd: queryLonEnd,
+    } = event.queryStringParameters;
+    if (queryLatStart && queryLonStart && queryLatEnd && queryLonEnd) {
+      event.latStart = parseFloat(queryLatStart);
+      event.lonStart = parseFloat(queryLonStart);
+      event.latEnd = parseFloat(queryLatEnd);
+      event.lonEnd = parseFloat(queryLonEnd);
     }
   }
 
@@ -40,7 +39,7 @@ export const handler = async (event: any) => {
   if ([latStart, lonStart, latEnd, lonEnd].some((v) => v === undefined)) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ message: 'Missing bounding box parameters.' }),
+      body: JSON.stringify({ message: 'Missing route parameters.' }),
     };
   }
 
@@ -113,12 +112,12 @@ export const handler = async (event: any) => {
 
   // Calculate the population impact score. This is score to one decimal place between 0 and 5
   // The maximum population impact is 5,000 people, so we scale it to a score out of 5
-  const populationImpactScore = Math.min(5, Math.max(0, Number((totalPopulationImpact / 1000).toFixed(1))));
+  const noiseImpactScore = Math.min(5, Math.max(0, Number((totalPopulationImpact / 1000).toFixed(1))));
 
   logger.info('Route Evaluation Complete', {
     routeDistance: routeDistance,
     totalPopulationImpact: Math.round(totalPopulationImpact),
-    populationImpactScore: populationImpactScore,
+    noiseImpactScore: noiseImpactScore,
     visibilityRisk: visibilityRisk,
     windRisk: windRisk,
   });
@@ -128,9 +127,9 @@ export const handler = async (event: any) => {
     body: JSON.stringify({
       routeDistance: routeDistance,
       populationImpact: Math.round(totalPopulationImpact),
-      populationImpactScore: populationImpactScore,
-      visibilityRisk: visibilityRisk,
-      windRisk: windRisk,
+      ...(noiseImpactScore && { noiseImpactScore: noiseImpactScore }),
+      ...(visibilityRisk && { visibilityRisk: visibilityRisk }),
+      ...(windRisk && { windRisk: windRisk }),
     }),
     isBase64Encoded: false,
     headers: {

@@ -30,3 +30,12 @@ export interface ApiResponse {
   items: MapData[];
   count: number;
 }
+
+export interface RouteResponse {
+  route: Array<{ lat: number; lon: number }>;
+  routeDistance: number;
+  populationImpact: number;
+  noiseImpactScore?: number;
+  visibilityRisk?: number;
+  windRisk?: number;
+}

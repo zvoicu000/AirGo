@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Marker, Popup, Polyline, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import Spinner from './Spinner';
+import RouteOverlay from './RouteOverlay';
+import { RouteResponse } from '../types';
 
 // Custom icons for start and end markers
 const startIcon = new L.Icon({
@@ -23,10 +25,7 @@ interface FlightPlannerProps {
   onClose: () => void;
 }
 
-interface FlightResult {
-  route: Array<{ lat: number; lon: number }>;
-  populationImpact: number;
-}
+interface FlightResult extends RouteResponse {}
 
 const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
   const [startPosition, setStartPosition] = useState<[number, number] | null>(null);
@@ -59,22 +58,12 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     setIsCalculating(true);
     try {
       const API_BASE_URL = window.API_BASE_URL;
-      const response = await fetch(`${API_BASE_URL}/routes/optimise`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          latStart: startPosition[0],
-          lonStart: startPosition[1],
-          latEnd: endPosition[0],
-          lonEnd: endPosition[1],
-        }),
-      });
-
+      const url = `${API_BASE_URL}/spatial/route?latStart=${startPosition[0]}&lonStart=${startPosition[1]}&latEnd=${endPosition[0]}&lonEnd=${endPosition[1]}`;
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to calculate flight');
       
       const result = await response.json();
       setFlightResult(result);
-      setShowResult(true);
     } catch (error) {
       console.error('Error calculating flight:', error);
       alert('Failed to calculate flight. Please try again.');
@@ -82,6 +71,13 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
       setIsCalculating(false);
     }
   };
+
+  // Call calculateFlight whenever start or end positions change
+  useEffect(() => {
+    if (startPosition && endPosition) {
+      calculateFlight();
+    }
+  }, [startPosition, endPosition]);
 
   const clearFlight = () => {
     setStartPosition(null);
@@ -99,7 +95,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
       {isCalculating && <Spinner size="lg" />}
       
       {/* Flight Planning Panel */}
-      <div className="absolute top-24 left-4 z-[1000] bg-white rounded-lg shadow-lg p-4 w-80">
+      <div className="absolute top-24 left-4 z-[1000] bg-white/70 backdrop-blur-md shadow-md p-4 w-80 border-2 border-gray-200">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Create Flight</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
@@ -210,12 +206,12 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
       )}
 
       {/* Optimised Flight Route */}
-      {flightResult && (
+      {/* {flightResult && (
         <Polyline
           positions={flightResult.route.map(p => [p.lat, p.lon])}
           pathOptions={{ color: '#3B82F6', weight: 3, opacity: 0.8 }}
         />
-      )}
+      )} */}
 
       {/* Results Modal */}
       {showResult && flightResult && (
@@ -260,6 +256,9 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
           </div>
         </div>
       )}
+
+      {/* Route Overlay */}
+      <RouteOverlay routeData={flightResult} />
     </>
   );
 };
