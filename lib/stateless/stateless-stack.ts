@@ -36,7 +36,7 @@ export class StatelessStack extends Stack {
     this.apiResources = new ApiResources(this, 'ApiResources', {
       stage: stage,
       envConfig: envConfig,
-      processRoute: this.lambdaResources.processRoute,
+      assessRoute: this.lambdaResources.assessRoute,
       optimiseRoute: this.lambdaResources.optimiseRoute,
       getBoundingBox: this.lambdaResources.getBoundingBox,
     });

@@ -15,7 +15,7 @@ interface LambdaResourcesProps extends NestedStackProps {
 
 export class LambdaResources extends NestedStack {
   public loadWeatherData: NodejsFunction;
-  public processRoute: NodejsFunction;
+  public assessRoute: NodejsFunction;
   public optimiseRoute: NodejsFunction;
   public getBoundingBox: NodejsFunction;
 
@@ -40,9 +40,9 @@ export class LambdaResources extends NestedStack {
     spatialDataTable.grantReadWriteData(this.loadWeatherData);
 
     // Create the ProcessRoute Lambda function
-    this.processRoute = new CustomLambda(this, 'ProcessRouteFunction', {
+    this.assessRoute = new CustomLambda(this, 'AssessRouteFunction', {
       envConfig: envConfig,
-      source: 'src/route-engine/process-route.ts',
+      source: 'src/queries/assess-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
         PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
@@ -50,7 +50,7 @@ export class LambdaResources extends NestedStack {
         GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
-    spatialDataTable.grantReadData(this.processRoute);
+    spatialDataTable.grantReadData(this.assessRoute);
 
     // Create the OptimiseRoute Lambda function
     this.optimiseRoute = new CustomLambda(this, 'OptimiseRouteFunction', {

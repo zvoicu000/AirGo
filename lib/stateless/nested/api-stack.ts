@@ -8,7 +8,7 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 interface ApiResourcesProps extends NestedStackProps {
   stage: Stage;
   envConfig: EnvironmentConfig;
-  processRoute: NodejsFunction;
+  assessRoute: NodejsFunction;
   optimiseRoute: NodejsFunction;
   getBoundingBox: NodejsFunction;
   allowedOrigins?: string[];
@@ -20,7 +20,7 @@ export class ApiResources extends NestedStack {
   constructor(scope: Construct, id: string, props: ApiResourcesProps) {
     super(scope, id, props);
 
-    const { processRoute, optimiseRoute, getBoundingBox } = props;
+    const { assessRoute, optimiseRoute, getBoundingBox } = props;
 
     // Create the API Gateway
     this.api = new RestApi(this, 'DroneDeliveryApi', {
@@ -43,9 +43,6 @@ export class ApiResources extends NestedStack {
     // Add routes resource
     const routes = this.api.root.addResource('routes');
 
-    // Add process route endpoint
-    routes.addMethod('POST', new LambdaIntegration(processRoute));
-
     // Add optimise route endpoint
     const optimise = routes.addResource('optimise');
     optimise.addMethod('POST', new LambdaIntegration(optimiseRoute));
@@ -56,6 +53,10 @@ export class ApiResources extends NestedStack {
     // Add bounding box query endpoint
     const boundingBox = spatial.addResource('bounding-box');
     boundingBox.addMethod('GET', new LambdaIntegration(getBoundingBox));
+
+    // Add route assessment resource
+    const assessRouteResource = spatial.addResource('route');
+    assessRouteResource.addMethod('GET', new LambdaIntegration(assessRoute));
 
     // Save the API URL to the System Manager Parameter Store
     new StringParameter(this, 'ApiUrlParameter', {
