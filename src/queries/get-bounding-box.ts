@@ -4,40 +4,38 @@
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
-import * as geohash from 'ngeohash';
-import { logger, chunkArray } from '../shared';
+import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { logger, BoundingBox, getBoundingBoxGeoHashes, RETURN_HEADERS, fetchGeoHashItemsFromDynamoDB } from '../shared';
 
 const client = new DynamoDBClient({});
 const ddb = DynamoDBDocumentClient.from(client);
 
 // Load environment variables
-const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
 const GSI_HASH_PRECISION = parseFloat(process.env.GSI_HASH_PRECISION || '4');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handler = async (event: any) => {
   logger.info('Processing Bounding Box Query', { event });
+  const boundingBox: BoundingBox = {
+    latMin: event.latMin,
+    lonMin: event.lonMin,
+    latMax: event.latMax,
+    lonMax: event.lonMax,
+  };
 
   // If the bounding box parameters are in the queryStringParameters, set them now
   if (event.queryStringParameters) {
-    const {
-      latMin: queryLatMin,
-      lonMin: queryLonMin,
-      latMax: queryLatMax,
-      lonMax: queryLonMax,
-    } = event.queryStringParameters;
-    if (queryLatMin && queryLonMin && queryLatMax && queryLonMax) {
-      event.latMin = parseFloat(queryLatMin);
-      event.lonMin = parseFloat(queryLonMin);
-      event.latMax = parseFloat(queryLatMax);
-      event.lonMax = parseFloat(queryLonMax);
+    const { latMin, lonMin, latMax, lonMax } = event.queryStringParameters;
+    if (latMin && lonMin && latMax && lonMax) {
+      boundingBox.latMin = parseFloat(latMin);
+      boundingBox.lonMin = parseFloat(lonMin);
+      boundingBox.latMax = parseFloat(latMax);
+      boundingBox.lonMax = parseFloat(lonMax);
     }
   }
 
-  const { latMin, lonMin, latMax, lonMax } = event;
-
-  if ([latMin, lonMin, latMax, lonMax].some((v) => v === undefined)) {
+  // Ensure all bounding box parameters are provided
+  if ([boundingBox.latMin, boundingBox.lonMin, boundingBox.latMax, boundingBox.lonMax].some((v) => v === undefined)) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: 'Missing bounding box parameters.' }),
@@ -45,59 +43,25 @@ export const handler = async (event: any) => {
   }
 
   // Step 1: Get all GeoHash prefixes covering the bounding box
-  const hashPrefixes = geohash.bboxes(latMin, lonMin, latMax, lonMax, GSI_HASH_PRECISION);
+  const hashPrefixes = getBoundingBoxGeoHashes(boundingBox, GSI_HASH_PRECISION);
   logger.info('Geohash Prefixes intercepting the bounding box', { count: hashPrefixes.length });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const results: any[] = [];
+  // Step 2: Query DynamoDB for each geohash prefix
+  const results = await fetchGeoHashItemsFromDynamoDB(ddb, hashPrefixes, true);
+  logger.info('Queried Results from GeoHashes', { count: results.length });
 
-  // Step 2: Process in chunks of 50 to avoid overwhelming DynamoDB
-  const chunks = chunkArray(hashPrefixes, 50);
-  for (const chunk of chunks) {
-    await Promise.all(
-      chunk.map(async (prefix) => {
-        try {
-          const command = new QueryCommand({
-            TableName: SPATIAL_DATA_TABLE,
-            KeyConditionExpression: 'GSI1PK = :pk',
-            IndexName: 'GSI1',
-            ExpressionAttributeValues: {
-              ':pk': prefix,
-            },
-          });
-
-          const response = await ddb.send(command);
-          if (response.Items) {
-            // logger.debug(`Found ${response.Items.length} items for prefix ${prefix}`, { prefix });
-            // Filter points to ensure they are actually within the bounding box
-            // (geohash boxes can extend beyond the requested bounding box)
-            const filteredItems = response.Items.filter((item) => {
-              return item.lat >= latMin && item.lat <= latMax && item.lon >= lonMin && item.lon <= lonMax;
-            });
-            results.push(...filteredItems);
-          }
-        } catch (err) {
-          logger.error(`Error querying prefix ${prefix}`, { error: err });
-        }
-      }),
-    );
-  }
-  logger.info('Found items within bounding box', { count: results.length });
+  // Step 3: Filter results to ensure they are within the bounding box
+  const { latMin, lonMin, latMax, lonMax } = boundingBox;
+  const filteredResults = results.filter((item) => {
+    return item.lat >= latMin && item.lat <= latMax && item.lon >= lonMin && item.lon <= lonMax;
+  });
+  logger.info('Filtered Results within Bounding Box', { count: filteredResults.length });
 
   return {
-    statusCode: 200,
     body: JSON.stringify({
-      items: results,
-      count: results.length,
+      items: filteredResults,
+      count: filteredResults.length,
     }),
-    isBase64Encoded: false,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers':
-        'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent',
-      'Access-Control-Allow-Credentials': 'true',
-      'Access-Control-Allow-Methods': 'OPTIONS,GET,PUT,POST,DELETE',
-    },
+    ...RETURN_HEADERS,
   };
 };
