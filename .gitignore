@@ -379,6 +379,7 @@ yarn.lock
 .cdk.staging
 cdk.out
 cdk.out.frontend
+cdk-output.json
 
 ### Typescript specific ignores ###
 # Exclude all JS files except frontend/postcss.config.js

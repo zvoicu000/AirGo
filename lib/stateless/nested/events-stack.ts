@@ -6,6 +6,7 @@ import { CustomLambda } from '../../constructs';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { DynamoEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { FilterCriteria, FilterRule, StartingPosition } from 'aws-cdk-lib/aws-lambda';
+import { AppSyncAuthorizationType, EventApi } from 'aws-cdk-lib/aws-appsync';
 
 interface EventResourcesProps extends NestedStackProps {
   stage: Stage;
@@ -16,11 +17,24 @@ interface EventResourcesProps extends NestedStackProps {
 
 export class EventResources extends NestedStack {
   public optimiseNewRoute: NodejsFunction;
+  public eventsApi: EventApi;
 
   constructor(scope: Construct, id: string, props: EventResourcesProps) {
     super(scope, id, props);
 
     const { envConfig, spatialDataTable, routesTable } = props;
+
+    // Create the AppSync Events Websocket API
+    const apiKeyProvider = { authorizationType: AppSyncAuthorizationType.API_KEY };
+
+    // create an API called `my-event-api` that uses API Key authorization
+    this.eventsApi = new EventApi(this, 'api', {
+      apiName: 'RouteOptimisationEvents',
+      authorizationConfig: { authProviders: [apiKeyProvider] },
+    });
+
+    // add a channel namespace called `default`
+    this.eventsApi.addChannelNamespace('default');
 
     // Create the OptimiseRoute Lambda function
     this.optimiseNewRoute = new CustomLambda(this, 'OptimiseNewRouteFunction', {
@@ -34,6 +48,8 @@ export class EventResources extends NestedStack {
         PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
         SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
         GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
+        APPSYNC_EVENTS_HTTP_DOMAIN: this.eventsApi.httpDns,
+        APPSYNC_EVENTS_API_KEY: this.eventsApi.apiKeys['Default'].attrApiKey,
       },
     }).lambda;
     spatialDataTable.grantReadData(this.optimiseNewRoute);
@@ -44,6 +60,9 @@ export class EventResources extends NestedStack {
       new DynamoEventSource(routesTable, {
         startingPosition: StartingPosition.LATEST,
         filters: [FilterCriteria.filter({ eventName: FilterRule.isEqual('INSERT') })],
+        retryAttempts: 2,
+        batchSize: 1,
+        maxRecordAge: Duration.minutes(5),
       }),
     );
   }

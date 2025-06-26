@@ -31,6 +31,8 @@ import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 
 const ROUTES_TABLE = process.env.ROUTES_TABLE;
+const APPSYNC_EVENTS_HTTP_DOMAIN = process.env.APPSYNC_EVENTS_HTTP_DOMAIN;
+const APPSYNC_EVENTS_API_KEY = process.env.APPSYNC_EVENTS_API_KEY;
 
 const client = new DynamoDBClient();
 const ddb = DynamoDBDocumentClient.from(client);
@@ -115,4 +117,43 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<undefined> =>
     },
   });
   await ddb.send(params);
+  logger.info('Optimised route saved to DynamoDB', { PK: routeRecord.PK });
+
+  // Step 6: Create an AppSync event to notify other services
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+  };
+  if (APPSYNC_EVENTS_API_KEY) {
+    headers['x-api-key'] = APPSYNC_EVENTS_API_KEY;
+  }
+
+  const appsyncEventPostResult = await fetch(`https://${APPSYNC_EVENTS_HTTP_DOMAIN}/event`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      channel: 'default/routes',
+      events: [
+        JSON.stringify({
+          type: 'routeOptimised',
+          data: {
+            id: routeRecord.PK,
+            optimisedRoute,
+            optimisedRouteDistance: routeDistance,
+            populationImpact,
+            noiseImpact,
+            visibilityRisk,
+            windRisk,
+          },
+        }),
+      ],
+    }),
+  });
+  if (!appsyncEventPostResult.ok) {
+    logger.error('Failed to post event to AppSync', {
+      status: appsyncEventPostResult.status,
+      statusText: appsyncEventPostResult.statusText,
+    });
+  } else {
+    logger.info('AppSync event posted successfully');
+  }
 };

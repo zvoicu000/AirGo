@@ -4,7 +4,7 @@
  * This includes Lambda functions, API Gateway and EventBridge.
  */
 
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { EnvironmentConfig, Stage } from '@config';
 import { LambdaResources } from './nested/lambda-stack';
@@ -53,10 +53,10 @@ export class StatelessStack extends Stack {
       getBoundingBox: this.lambdaResources.getBoundingBox,
     });
 
-    // Output the API URL
-    this.exportValue(this.apiResources.api.url, {
-      name: 'ApiUrl',
-      description: 'The URL of the API Gateway for the Drone Delivery Service',
-    });
+    // Output the Events API details
+    new CfnOutput(this, 'restApiUrl', { value: this.apiResources.api.url });
+    new CfnOutput(this, 'eventsApiKey', { value: this.eventResources.eventsApi.apiKeys['Default'].attrApiKey });
+    new CfnOutput(this, 'eventsHttpDomain', { value: this.eventResources.eventsApi.httpDns });
+    new CfnOutput(this, 'eventsRealtimeDomain', { value: this.eventResources.eventsApi.realtimeDns });
   }
 }
