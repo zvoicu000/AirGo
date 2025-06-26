@@ -6,7 +6,7 @@
  * It makes use of the A* style search algorithm with deviation constraints.
  * Core logic for the algorithm is contained in the shared route-engine module.
  *
- * This software is licensed under the Apache License, Version 2.0.
+ * This software is licensed under the GNU General Public License v3.0.
  */
 
 import {
@@ -35,13 +35,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   logger.info('Processing Drone Operation Route Optimisation', { event });
 
   // Ensure all route parameters are provided
+  const payload = event.body ? JSON.parse(event.body) : {};
   if (
-    [
-      event.queryStringParameters?.latStart,
-      event.queryStringParameters?.lonStart,
-      event.queryStringParameters?.latEnd,
-      event.queryStringParameters?.lonEnd,
-    ].some((v) => v === undefined)
+    [payload.startPoint?.lat, payload.startPoint?.lon, payload.endPoint?.lat, payload.endPoint?.lon].some(
+      (v) => v === undefined,
+    )
   ) {
     return {
       statusCode: 400,
@@ -51,12 +49,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   // Setup the start and end points
   const startPoint: Point = {
-    lat: event.queryStringParameters?.latStart ? parseFloat(event.queryStringParameters?.latStart) : 0,
-    lon: event.queryStringParameters?.lonStart ? parseFloat(event.queryStringParameters?.lonStart) : 0,
+    lat: payload.startPoint?.lat || 0,
+    lon: payload.startPoint?.lon || 0,
   };
   const endPoint: Point = {
-    lat: event.queryStringParameters?.latEnd ? parseFloat(event.queryStringParameters?.latEnd) : 0,
-    lon: event.queryStringParameters?.lonEnd ? parseFloat(event.queryStringParameters?.lonEnd) : 0,
+    lat: payload.endPoint?.lat || 0,
+    lon: payload.endPoint?.lon || 0,
   };
 
   // Step 1: Get all GeoHash prefixes covering the route

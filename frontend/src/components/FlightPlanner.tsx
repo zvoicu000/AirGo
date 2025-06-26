@@ -31,9 +31,19 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
   const [startPosition, setStartPosition] = useState<[number, number] | null>(null);
   const [endPosition, setEndPosition] = useState<[number, number] | null>(null);
   const [flightResult, setFlightResult] = useState<FlightResult | null>(null);
+  const [optimizedRoute, setOptimizedRoute] = useState<FlightResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [placingMarker, setPlacingMarker] = useState<'start' | 'end' | null>(null);
+  const [hoveredRoute, setHoveredRoute] = useState<'original' | 'optimized' | null>(null);
+
+  // Set initial marker placement when dialog becomes active
+  useEffect(() => {
+    if (isActive && !startPosition && !endPosition) {
+      setPlacingMarker('start');
+    }
+  }, [isActive]);
 
   const MapClickHandler = () => {
     useMapEvents({
@@ -43,10 +53,11 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
         const { lat, lng } = e.latlng;
         if (placingMarker === 'start') {
           setStartPosition([lat, lng]);
+          setPlacingMarker('end'); // Automatically switch to end position
         } else {
           setEndPosition([lat, lng]);
+          setPlacingMarker(null);
         }
-        setPlacingMarker(null);
       },
     });
     return null;
@@ -72,6 +83,42 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     }
   };
 
+  const optimizeRoute = async () => {
+    if (!startPosition || !endPosition) return;
+
+    setIsOptimizing(true);
+    try {
+      const API_BASE_URL = window.API_BASE_URL;
+      const response = await fetch(`${API_BASE_URL}/routes/optimise-route`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startPoint: {
+            lat: startPosition[0],
+            lon: startPosition[1]
+          },
+          endPoint: {
+            lat: endPosition[0],
+            lon: endPosition[1]
+          }
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to optimize route');
+      
+      const result = await response.json();
+      setOptimizedRoute(result);
+      setShowResult(true);
+    } catch (error) {
+      console.error('Error optimizing route:', error);
+      alert('Failed to optimize route. Please try again.');
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
   // Call calculateFlight whenever start or end positions change
   useEffect(() => {
     if (startPosition && endPosition) {
@@ -83,7 +130,9 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     setStartPosition(null);
     setEndPosition(null);
     setFlightResult(null);
+    setOptimizedRoute(null);
     setShowResult(false);
+    setHoveredRoute(null);
   };
 
   if (!isActive) return <MapClickHandler />;
@@ -147,6 +196,13 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
               {isCalculating ? 'Calculating...' : 'Calculate Flight'}
             </button>
             <button
+              onClick={optimizeRoute}
+              disabled={!flightResult || isOptimizing}
+              className="flex-1 bg-green-600 text-white p-2 rounded text-sm hover:bg-green-700 disabled:bg-gray-300"
+            >
+              {isOptimizing ? 'Optimizing...' : 'Optimize Route'}
+            </button>
+            <button
               onClick={clearFlight}
               className="px-3 py-2 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
             >
@@ -205,13 +261,37 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
         />
       )}
 
-      {/* Optimised Flight Route */}
-      {/* {flightResult && (
+      {/* Original Flight Route */}
+      {flightResult && (
         <Polyline
           positions={flightResult.route.map(p => [p.lat, p.lon])}
-          pathOptions={{ color: '#3B82F6', weight: 3, opacity: 0.8 }}
+          pathOptions={{ 
+            color: '#3B82F6', 
+            weight: hoveredRoute === 'original' ? 4 : 3, 
+            opacity: hoveredRoute === 'optimized' ? 0.4 : 0.8 
+          }}
+          eventHandlers={{
+            mouseover: () => setHoveredRoute('original'),
+            mouseout: () => setHoveredRoute(null)
+          }}
         />
-      )} */}
+      )}
+
+      {/* Optimised Flight Route */}
+      {optimizedRoute && (
+        <Polyline
+          positions={optimizedRoute.route.map(p => [p.lat, p.lon])}
+          pathOptions={{ 
+            color: '#22C55E', 
+            weight: hoveredRoute === 'optimized' ? 4 : 3, 
+            opacity: hoveredRoute === 'original' ? 0.4 : 0.8 
+          }}
+          eventHandlers={{
+            mouseover: () => setHoveredRoute('optimized'),
+            mouseout: () => setHoveredRoute(null)
+          }}
+        />
+      )}
 
       {/* Results Modal */}
       {showResult && flightResult && (
@@ -258,7 +338,11 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
       )}
 
       {/* Route Overlay */}
-      <RouteOverlay routeData={flightResult} />
+      <RouteOverlay 
+        routeData={flightResult} 
+        optimizedData={optimizedRoute}
+        hoveredRoute={hoveredRoute}
+      />
     </>
   );
 };

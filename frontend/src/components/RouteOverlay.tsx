@@ -92,35 +92,45 @@ const RiskDial: React.FC<RiskDialProps> = ({ value, label }) => {
 
 interface RouteOverlayProps {
   routeData: RouteResponse | null;
+  optimizedData: RouteResponse | null;
+  hoveredRoute: 'original' | 'optimized' | null;
 }
 
-const RouteOverlay: React.FC<RouteOverlayProps> = ({ routeData }) => {
+const RouteOverlay: React.FC<RouteOverlayProps> = ({ routeData, optimizedData, hoveredRoute }) => {
   if (!routeData) return null;
+
+  // Determine which data to display based on hover state
+  const displayData = hoveredRoute === 'optimized' && optimizedData ? optimizedData : routeData;
 
   return (
     <div className="absolute bottom-7 left-1/2 z-[1000] bg-white/70 backdrop-blur-md shadow-md p-4 border-2 border-gray-200 max-w-[800px] w-[calc(100%-80px)] transform -translate-x-1/2">
       <div className="grid grid-cols-5 gap-4">
         <div className="flex flex-col items-center">
-          <span className="text-lg font-semibold">{routeData.routeDistance.toFixed(1)}</span>
+          <span className="text-lg font-semibold">{displayData.routeDistance.toFixed(1)}</span>
           <span className="text-sm text-gray-600">Distance (km)</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-lg font-semibold">{routeData.populationImpact.toLocaleString()}</span>
+          <span className="text-lg font-semibold">{displayData.populationImpact.toLocaleString()}</span>
           <span className="text-sm text-gray-600">Population Impact</span>
         </div>
         <RiskDial 
-          value={routeData.noiseImpactScore} 
+          value={displayData.noiseImpactScore} 
           label="Noise Impact"
         />
         <RiskDial 
-          value={routeData.visibilityRisk} 
+          value={displayData.visibilityRisk} 
           label="Visibility Risk"
         />
         <RiskDial 
-          value={routeData.windRisk} 
+          value={displayData.windRisk} 
           label="Wind Risk"
         />
       </div>
+      {optimizedData && (
+        <div className="mt-2 text-sm text-center text-gray-600">
+          {hoveredRoute === 'optimized' ? 'Showing optimized route metrics' : 'Showing original route metrics'} - Hover over routes to compare
+        </div>
+      )}
     </div>
   );
 };

@@ -6,7 +6,7 @@
  * It uses the sparsely populated Global Secondary Index (GSI) of DynamoDB, which has a lower precision geohash
  * to efficiently query items that fall within the bounding box.
  *
- * This software is licensed under the Apache License, Version 2.0.
+ * This software is licensed under the GNU General Public License v3.0.
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';

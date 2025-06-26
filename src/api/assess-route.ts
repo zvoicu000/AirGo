@@ -5,7 +5,7 @@
  * It assesses the impact of the route on populated areas, noise levels, and weather conditions.
  * Core logic for the algorithm is contained in the shared route-engine module.
  *
- * This software is licensed under the Apache License, Version 2.0.
+ * This software is licensed under the GNU General Public License v3.0.
  */
 
 import {
@@ -83,6 +83,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   return {
     body: JSON.stringify({
+      route: [startPoint, endPoint],
       routeDistance: routeDistance,
       populationImpact: populationImpact,
       ...(noiseImpact && { noiseImpactScore: noiseImpact }),

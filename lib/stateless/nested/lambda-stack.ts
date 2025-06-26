@@ -55,6 +55,7 @@ export class LambdaResources extends NestedStack {
     // Create the OptimiseRoute Lambda function
     this.optimiseRoute = new CustomLambda(this, 'OptimiseRouteFunction', {
       envConfig: envConfig,
+      memorySize: 2048, // Increase CPU for A* algorithm
       source: 'src/api/optimise-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
