@@ -9,7 +9,7 @@ const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
 const ROUTES_TABLE = process.env.ROUTES_TABLE;
 const MAXIMUM_DYNAMODB_FETCH = 10; // Maximum number of fetches to prevent infinite loops
 const DYNAMODB_FETCH_LIMIT = 1000; // Maximum items to fetch per request
-const STEP_DISTANCE = 1000; // meters per step
+const MIN_STEP_DISTANCE = 1500; // minimum meters per step
 const ANGLE_RANGE = 30; // degrees
 const SEARCH_ITERATIONS = 5; // angles to try
 const MAX_DEVIATION_RATIO = 0.2; // 20% of straight-line length
@@ -428,7 +428,13 @@ export async function findOptimisedRoute(start: Point, end: Point, spatialData: 
   logger.info('Starting route optimisation', { startTime });
 
   const straightDist = getDistance(start, end);
+  const stepDistance = Math.max(straightDist * 0.05, MIN_STEP_DISTANCE); // Ensure step distance is at least 5% of straight distance
   const maxDeviation = straightDist * MAX_DEVIATION_RATIO;
+  logger.debug('Route optimisation parameters', {
+    straightDist,
+    stepDistance,
+    maxDeviation,
+  });
 
   const openSet: Node[] = [];
   const closedSet = new Set<string>();
@@ -452,7 +458,7 @@ export async function findOptimisedRoute(start: Point, end: Point, spatialData: 
     closedSet.add(key);
 
     // Check if reached goal within one step
-    if (getDistance(current, end) <= STEP_DISTANCE) {
+    if (getDistance(current, end) <= stepDistance) {
       // Reconstruct path
       const path: Point[] = [];
       let node: Node | undefined = current;
@@ -474,7 +480,7 @@ export async function findOptimisedRoute(start: Point, end: Point, spatialData: 
     const directBearing = getRhumbLineBearing(current, end);
     for (let i = 0; i < SEARCH_ITERATIONS; i++) {
       const angle = directBearing + ANGLE_RANGE * ((2 * i) / (SEARCH_ITERATIONS - 1) - 1);
-      const dest = computeDestinationPoint({ latitude: current.lat, longitude: current.lon }, STEP_DISTANCE, angle);
+      const dest = computeDestinationPoint({ latitude: current.lat, longitude: current.lon }, stepDistance, angle);
       const neighbor: Point = { lat: dest.latitude, lon: dest.longitude };
       const nKey = nodeKey(neighbor);
       if (closedSet.has(nKey)) continue;
