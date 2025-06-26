@@ -7,9 +7,18 @@ import { getDistance, getRhumbLineBearing, computeDestinationPoint, getDistanceF
 const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
 const MAXIMUM_DYNAMODB_FETCH = 10; // Maximum number of fetches to prevent infinite loops
 const DYNAMODB_FETCH_LIMIT = 1000; // Maximum items to fetch per request
+const STEP_DISTANCE = 1000; // meters per step
+const ANGLE_RANGE = 30; // degrees
+const SEARCH_ITERATIONS = 10; // angles to try
+const MAX_DEVIATION_RATIO = 0.2; // 20% of straight-line length
 
 export type Point = { lat: number; lon: number };
 export type BoundingBox = { latMin: number; lonMin: number; latMax: number; lonMax: number };
+interface Node extends Point {
+  g: number; // cost so far
+  f: number; // estimated total cost
+  parent?: Node;
+}
 
 /**
  * Calculates and returns an array of geohash strings that cover the specified bounding box.
@@ -94,7 +103,7 @@ export function getRouteGeoHashes(
  * @param geoPoints - An array of geo points to check, each expected to have `lat`, `lon`, and `type` properties.
  * @returns An array of geo points that are near the route according to their type-specific distance thresholds.
  */
-export function getPointsNearRoute(start: Point, end: Point, geoPoints: Array<any>): Array<any> {
+export function getPointsNearRouteSegment(start: Point, end: Point, geoPoints: Array<any>): Array<any> {
   const results: Array<any> = [];
   const populationDistanceThreshold = 500; // Distance in meters
   const weatherDistanceThreshold = 20000; // Distance in meters
@@ -121,6 +130,30 @@ export function getPointsNearRoute(start: Point, end: Point, geoPoints: Array<an
   }
 
   return results;
+}
+
+/**
+ * Finds and returns all geoPoints that are near any segment of a given route.
+ *
+ * Iterates through each consecutive pair of points in the `routePoints` array,
+ * and for each segment, finds geoPoints that are near that segment using
+ * `getPointsNearRouteSegment`. The results are deduplicated based on latitude and longitude.
+ *
+ * @param routePoints - An array of route points representing the path (each point should have at least `lat` and `lon` properties).
+ * @param geoPoints - An array of geoPoints to check for proximity to the route segments.
+ * @returns An array of geoPoints that are near any segment of the route, with duplicates removed.
+ */
+export function getPointsNearRoute(routePoints: Array<Point>, geoPoints: Array<any>): Array<any> {
+  const results: Array<any> = [];
+  for (let i = 0; i < routePoints.length - 1; i++) {
+    const segmentStart = routePoints[i];
+    const segmentEnd = routePoints[i + 1];
+    const segmentPoints = getPointsNearRouteSegment(segmentStart, segmentEnd, geoPoints);
+    results.push(...segmentPoints);
+  }
+  // Remove duplicates based on a unique identifier (e.g., lat, lon)
+  const uniqueResults = Array.from(new Map(results.map((item) => [`${item.lat},${item.lon}`, item])).values());
+  return uniqueResults;
 }
 
 /**
@@ -155,7 +188,6 @@ export async function fetchGeoHashItemsFromDynamoDB(
       }),
     );
   }
-  logger.info('Queried Results from GeoHashes', { count: results.length });
   return results;
 }
 
@@ -222,9 +254,12 @@ export async function performGeospatialQueryCommand(
  * @param end - The ending point of the route.
  * @returns A promise that resolves to the round trip distance in kilometers, rounded to one decimal place.
  */
-export async function getRouteDistance(start: Point, end: Point): Promise<number> {
+export async function getRouteDistance(routePoints: Array<Point>): Promise<number> {
   // Calculate the round trip distance in km between the start and end points
-  const distance = getDistance(start, end);
+  const distance = routePoints.reduce((acc, point, i) => {
+    if (i === 0) return acc;
+    return acc + getDistance(routePoints[i - 1], point);
+  }, 0);
   // Convert to kilometers, double to get the round trip distance, and round to one decimal place
   const routeLength = Number((distance / 500).toFixed(1));
   return routeLength;
@@ -305,4 +340,129 @@ export async function assessWeatherImpact(
     visibilityRisk,
     windRisk,
   };
+}
+
+/**
+ * Calculates a penalty score based on the population near a given point and its distance to a segment end.
+ *
+ * The penalty increases with higher population and proximity to the segment end:
+ * - If the point is within 500 meters of the segment end, the penalty is `population * 2`.
+ * - If the point is within 1000 meters (but more than 500 meters), the penalty is `population * 1`.
+ * - Otherwise, the penalty is 0.
+ *
+ * @param point - The point of interest, expected to have `lat`, `lon`, and optionally `population` properties.
+ * @param segmentStart - The starting point of the segment.
+ * @param segmentEnd - The ending point of the segment.
+ * @returns The calculated population penalty as a number.
+ */
+function populationPenalty(point: any, segmentStart: Point, segmentEnd: Point): number {
+  const distance = getDistance(
+    { latitude: point.lat, longitude: point.lon },
+    { latitude: segmentEnd.lat, longitude: segmentEnd.lon },
+  );
+  const pop = point.population || 0;
+  if (distance <= 500) return pop * 2;
+  if (distance <= 1000) return pop * 1;
+  return 0;
+}
+
+/**
+ * Calculates the perpendicular distance from a point `p` to the line segment defined by points `a` and `b`.
+ *
+ * @param p - The point from which the perpendicular distance is measured.
+ * @param a - The starting point of the line segment.
+ * @param b - The ending point of the line segment.
+ * @returns The shortest distance from point `p` to the line segment `ab`, in meters.
+ */
+function perpendicularDistance(p: Point, a: Point, b: Point): number {
+  // Convert to lat/lon objects for geolib
+  return getDistanceFromLine(
+    { latitude: p.lat, longitude: p.lon },
+    { latitude: a.lat, longitude: a.lon },
+    { latitude: b.lat, longitude: b.lon },
+  );
+}
+
+/**
+ * Finds an optimised route from a start point to an end point, considering spatial data constraints.
+ *
+ * This function uses an A*-like search algorithm to find a path from the `start` point to the `end` point,
+ * minimizing traversal cost based on spatial data (e.g., population density) and limiting deviation from the straight line.
+ * The search expands possible steps in a range of angles around the direct bearing to the goal, and applies penalties
+ * for traversing through certain spatial features.
+ *
+ * @param start - The starting point of the route.
+ * @param end - The destination point of the route.
+ * @param spatialData - An array of spatial data objects used to calculate traversal penalties (e.g., population points).
+ * @returns A promise that resolves to an array of `Point` objects representing the optimised route from start to end.
+ */
+export async function findOptimisedRoute(start: Point, end: Point, spatialData: any[]): Promise<Point[]> {
+  const straightDist = getDistance(start, end);
+  const maxDeviation = straightDist * MAX_DEVIATION_RATIO;
+
+  const openSet: Node[] = [];
+  const closedSet = new Set<string>();
+
+  function nodeKey(p: Point) {
+    return `${p.lat.toFixed(6)},${p.lon.toFixed(6)}`;
+  }
+
+  // Heuristic: straight-line distance to goal
+  const heuristic = (p: Point) => getDistance(p, end);
+
+  // Initialize start node
+  openSet.push({ ...start, g: 0, f: heuristic(start) });
+
+  while (openSet.length) {
+    // Pop node with lowest f
+    openSet.sort((a, b) => a.f - b.f);
+    const current = openSet.shift()!;
+    const key = nodeKey(current);
+    if (closedSet.has(key)) continue;
+    closedSet.add(key);
+
+    // Check if reached goal within one step
+    if (getDistance(current, end) <= STEP_DISTANCE) {
+      // Reconstruct path
+      const path: Point[] = [];
+      let node: Node | undefined = current;
+      while (node) {
+        path.unshift({ lat: node.lat, lon: node.lon });
+        node = node.parent;
+      }
+      path.push(end);
+      return path;
+    }
+
+    // Expand neighbors
+    const directBearing = getRhumbLineBearing(current, end);
+    for (let i = 0; i < SEARCH_ITERATIONS; i++) {
+      const angle = directBearing + ANGLE_RANGE * ((2 * i) / (SEARCH_ITERATIONS - 1) - 1);
+      const dest = computeDestinationPoint({ latitude: current.lat, longitude: current.lon }, STEP_DISTANCE, angle);
+      const neighbor: Point = { lat: dest.latitude, lon: dest.longitude };
+      const nKey = nodeKey(neighbor);
+      if (closedSet.has(nKey)) continue;
+
+      // Check deviation constraint
+      if (perpendicularDistance(neighbor, start, end) > maxDeviation) {
+        continue;
+      }
+
+      // Compute traversal cost (g)
+      const segmentData = spatialData.filter((p) => p.type === 'Population');
+      let stepCost = 0;
+      for (const popPoint of segmentData) {
+        stepCost += populationPenalty(popPoint, current, neighbor);
+      }
+
+      const tentativeG = current.g + stepCost;
+      const h = heuristic(neighbor);
+      const f = tentativeG + h;
+
+      openSet.push({ ...neighbor, g: tentativeG, f, parent: current });
+    }
+  }
+
+  // No path found, default straight line
+  return [start, end];
 }

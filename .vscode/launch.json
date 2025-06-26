@@ -57,12 +57,12 @@
         "target": "code",
         "architecture": "arm64",
         "projectRoot": "dist",
-        "lambdaHandler": "route-engine/optimise-route.handler"
+        "lambdaHandler": "queries/optimise-route.handler"
       },
       "lambda": {
         "runtime": "nodejs22.x",
         "payload": {
-          "path": "${workspaceFolder}/test/payloads/route-engine/optimise-route-event.json"
+          "path": "${workspaceFolder}/test/payloads/queries/optimise-route-event.json"
         }
       },
       "sam": {

@@ -1,6 +1,6 @@
 {
-  "resource": "/spatial/route",
-  "path": "/spatial/route",
+  "resource": "/spatial/optimise-route",
+  "path": "/spatial/optimise-route",
   "httpMethod": "GET",
   "headers": {
     "Accept": "*/*",
