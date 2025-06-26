@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as geohash from 'ngeohash';
 import { logger, chunkArray } from '../shared';
-import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { getDistance, getRhumbLineBearing, computeDestinationPoint, getDistanceFromLine } from 'geolib';
+import { ulid } from 'ulid';
 
 const SPATIAL_DATA_TABLE = process.env.SPATIAL_DATA_TABLE;
+const ROUTES_TABLE = process.env.ROUTES_TABLE;
 const MAXIMUM_DYNAMODB_FETCH = 10; // Maximum number of fetches to prevent infinite loops
 const DYNAMODB_FETCH_LIMIT = 1000; // Maximum items to fetch per request
 const STEP_DISTANCE = 1000; // meters per step
@@ -154,6 +156,17 @@ export function getPointsNearRoute(routePoints: Array<Point>, geoPoints: Array<a
   // Remove duplicates based on a unique identifier (e.g., lat, lon)
   const uniqueResults = Array.from(new Map(results.map((item) => [`${item.lat},${item.lon}`, item])).values());
   return uniqueResults;
+}
+
+export async function createRouteRecord(ddb: DynamoDBDocumentClient, route: Array<Point>): Promise<void> {
+  const params = new PutCommand({
+    TableName: ROUTES_TABLE,
+    Item: {
+      PK: ulid(),
+      routePoints: route,
+    },
+  });
+  await ddb.send(params);
 }
 
 /**

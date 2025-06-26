@@ -37,7 +37,8 @@ import {
 
 import { Construct } from 'constructs';
 
-interface CustomTableProps extends Pick<TableProps, 'removalPolicy' | 'partitionKey' | 'tableName' | 'sortKey'> {
+interface CustomTableProps
+  extends Pick<TableProps, 'removalPolicy' | 'partitionKey' | 'tableName' | 'sortKey' | 'stream'> {
   stageName: string; //The stage name which the dynamodb table is being used with
   partitionKey: Attribute; // The partition key attribute for the table
   removalPolicy: RemovalPolicy; //The removal policy for the table

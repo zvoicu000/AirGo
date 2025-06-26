@@ -11,6 +11,7 @@ interface LambdaResourcesProps extends NestedStackProps {
   stage: Stage;
   envConfig: EnvironmentConfig;
   spatialDataTable: Table;
+  routesTable: Table;
 }
 
 export class LambdaResources extends NestedStack {
@@ -22,7 +23,7 @@ export class LambdaResources extends NestedStack {
   constructor(scope: Construct, id: string, props: LambdaResourcesProps) {
     super(scope, id, props);
 
-    const { envConfig, spatialDataTable } = props;
+    const { envConfig, spatialDataTable, routesTable } = props;
 
     // Create the LoadWeatherDataFunction Lambda function
     this.loadWeatherData = new CustomLambda(this, 'LoadWeatherDataFunction', {
@@ -59,12 +60,14 @@ export class LambdaResources extends NestedStack {
       source: 'src/api/optimise-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
+        ROUTES_TABLE: routesTable.tableName,
         PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
         SORT_KEY_HASH_PRECISION: envConfig.sortKeyHashPrecision?.toString(),
         GSI_HASH_PRECISION: envConfig.gsiHashPrecision?.toString(),
       },
     }).lambda;
     spatialDataTable.grantReadData(this.optimiseRoute);
+    routesTable.grantReadWriteData(this.optimiseRoute);
 
     // Create the GetBoundingBox Lambda function
     this.getBoundingBox = new CustomLambda(this, 'GetBoundingBoxFunction', {

@@ -21,6 +21,7 @@ import {
   assessPopulationImpact,
   assessNoiseImpact,
   assessWeatherImpact,
+  createRouteRecord,
 } from '../shared';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
@@ -56,6 +57,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     lat: payload.endPoint?.lat || 0,
     lon: payload.endPoint?.lon || 0,
   };
+
+  // Create a new record in the routes table for this request
+  await createRouteRecord(ddb, [startPoint, endPoint]);
 
   // Step 1: Get all GeoHash prefixes covering the route
   const hashPrefixes = getRouteGeoHashes(startPoint, endPoint, PARTITION_KEY_HASH_PRECISION);

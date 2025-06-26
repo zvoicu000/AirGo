@@ -6,7 +6,7 @@
 import * as path from 'path';
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { Table, AttributeType } from 'aws-cdk-lib/aws-dynamodb';
+import { Table, AttributeType, StreamViewType } from 'aws-cdk-lib/aws-dynamodb';
 import { EnvironmentConfig, Stage, getRemovalPolicyFromStage } from '../../config';
 import { CustomTable } from '../constructs/custom-table';
 
@@ -18,6 +18,7 @@ export interface StatefulStackProps extends StackProps {
 export class StatefulStack extends Stack {
   // Exports from this stack
   public readonly spatialDataTable: Table;
+  public readonly routesTable: Table;
 
   constructor(scope: Construct, id: string, props: StatefulStackProps) {
     super(scope, id, props);
@@ -44,6 +45,18 @@ export class StatefulStack extends Stack {
           sortKey: { name: 'GSI1SK', type: AttributeType.STRING },
         },
       ],
+    }).table;
+
+    // Define a DynamoDB table that will used to store the flight routes
+    this.routesTable = new CustomTable(this, 'RoutesTable', {
+      tableName: envConfig.routesTableName,
+      stageName: stage,
+      removalPolicy: getRemovalPolicyFromStage(stage),
+      partitionKey: {
+        name: 'PK',
+        type: AttributeType.STRING,
+      },
+      stream: StreamViewType.NEW_AND_OLD_IMAGES,
     }).table;
   }
 }

@@ -24,6 +24,7 @@ export interface EnvironmentConfig {
   minifyCodeOnDeployment?: boolean;
   apiUrlParameterName?: string;
   spatialDataTableName?: string;
+  routesTableName?: string;
   partitionKeyHashPrecision?: number;
   sortKeyHashPrecision?: number;
   gsiHashPrecision?: number;
@@ -44,10 +45,11 @@ const defaultConfig: EnvironmentConfig = {
   stage: Stage.dev,
   name: 'Default',
   terminationProtection: false,
-  logLevel: 'DEBUG',
+  logLevel: 'INFO',
   minifyCodeOnDeployment: false,
   apiUrlParameterName: '/droneServiceApi/apiUrl',
   spatialDataTableName: 'SpatialDataTable',
+  routesTableName: 'RoutesTable',
   partitionKeyHashPrecision: 5, // Approx 5km resolution for partitioning
   sortKeyHashPrecision: 8, // Approx 50m resolution for sorting
   gsiHashPrecision: 4, // Approx 40km resolution for GSI partitioning
