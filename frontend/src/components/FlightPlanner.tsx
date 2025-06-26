@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Marker, Popup, Polyline, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import Spinner from './Spinner';
@@ -43,7 +43,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     if (isActive && !startPosition && !endPosition) {
       setPlacingMarker('start');
     }
-  }, [isActive]);
+  }, [isActive, startPosition, endPosition]);
 
   const MapClickHandler = () => {
     useMapEvents({
@@ -63,7 +63,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     return null;
   };
 
-  const calculateFlight = async () => {
+  const calculateFlight = useCallback(async () => {
     if (!startPosition || !endPosition) return;
 
     setIsCalculating(true);
@@ -81,7 +81,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     } finally {
       setIsCalculating(false);
     }
-  };
+  }, [startPosition, endPosition]);
 
   const optimiseRoute = async () => {
     if (!startPosition || !endPosition) return;
@@ -124,7 +124,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     if (startPosition && endPosition) {
       calculateFlight();
     }
-  }, [startPosition, endPosition]);
+  }, [startPosition, endPosition, calculateFlight]);
 
   const clearFlight = () => {
     setStartPosition(null);
