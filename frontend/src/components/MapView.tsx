@@ -15,8 +15,7 @@ L.Icon.Default.mergeOptions({
 
 // Weather icon
 const weatherIcon = new L.Icon({
-  iconUrl:
-    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjRkZENzAwIi8+CjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjMiIGZpbGw9IiNGRkE1MDAiLz4KPC9zdmc+',
+  iconUrl: '/weather-icon.svg',
   iconSize: [32, 32],
   iconAnchor: [16, 16],
   popupAnchor: [0, -16],

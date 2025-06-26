@@ -81,7 +81,9 @@ const App: React.FC = () => {
       <header className="fixed top-0 left-0 right-0 z-[1000] bg-white/70 backdrop-blur-md shadow-md">
         <div className="px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <img src="/drone-icon.svg" alt="Drone Icon" className="w-12 h-12 text-blue-600" />
+            <a href="/">
+              <img src="/drone-icon.svg" alt="Drone Icon" className="w-12 h-12 text-blue-600" />
+            </a>
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Drone SoundAware</h1>
               <p className="text-sm text-gray-600 italic">Route with Respect — Minimise Noise, Maximise Impact</p>
