@@ -106,16 +106,10 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBas
         })
       });
 
-      if (!response.ok) throw new Error('Failed to optimise route');
-      
-      //const result = await response.json();
-      //setOptimisedRoute(result);
-      //setShowResult(true);
+      if (!response.ok) throw new Error('Failed to send route for optimisation');
     } catch (error) {
-      console.error('Error optimising route:', error);
-      alert('Failed to optimise route. Please try again.');
-    } finally {
-      setIsOptimising(false);
+      console.error('Error sending route for optimisation:', error);
+      alert('Failed to send route for optimisation. Please try again.');
     }
   };
 
@@ -123,6 +117,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBas
   useEffect(() => {
     if (receivedOptimisedRoute) {
       setOptimisedRoute(receivedOptimisedRoute);
+      setIsOptimising(false);
       setShowResult(true); // Show the results modal when optimised route is received
     }
   }, [receivedOptimisedRoute]);
@@ -141,6 +136,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBas
     setOptimisedRoute(null);
     setShowResult(false);
     setHoveredRoute(null);
+    setIsOptimising(false);
   };
 
   if (!isActive) return <MapClickHandler />;
@@ -199,9 +195,15 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBas
             <button
               onClick={optimiseRoute}
               disabled={!flightResult || isOptimising}
-              className="flex-1 bg-green-600 text-white p-2 rounded text-sm hover:bg-green-700 disabled:bg-gray-300"
+              className="flex-1 bg-green-600 text-white p-2 rounded text-sm hover:bg-green-700 disabled:bg-gray-300 flex items-center justify-center space-x-2"
             >
-              {isOptimising ? 'Optimising...' : 'Optimise Route'}
+              {isOptimising && (
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              <span>{isOptimising ? 'Optimising' : 'Optimise Route'}</span>
             </button>
             <button
               onClick={clearFlight}
@@ -230,6 +232,8 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBas
               const marker = e.target;
               const position = marker.getLatLng();
               setStartPosition([position.lat, position.lng]);
+              setOptimisedRoute(null); // Clear optimised route when start position changes
+              setShowResult(false); // Hide the results modal
             },
           }}
         >
@@ -247,6 +251,8 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBas
               const marker = e.target;
               const position = marker.getLatLng();
               setEndPosition([position.lat, position.lng]);
+              setOptimisedRoute(null); // Clear optimised route when end position changes
+              setShowResult(false); // Hide the results modal
             },
           }}
         >
