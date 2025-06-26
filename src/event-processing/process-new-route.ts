@@ -137,10 +137,10 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<undefined> =>
           type: 'routeOptimised',
           data: {
             id: routeRecord.PK,
-            optimisedRoute,
-            optimisedRouteDistance: routeDistance,
+            route: optimisedRoute,
+            routeDistance,
             populationImpact,
-            noiseImpact,
+            noiseImpactScore: noiseImpact,
             visibilityRisk,
             windRisk,
           },

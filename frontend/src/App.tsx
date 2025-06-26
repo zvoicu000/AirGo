@@ -39,7 +39,7 @@ const App: React.FC = () => {
             const message = JSON.parse(evt.data);
             if (message.type === 'data') {
               console.log('Received WebSocket message:', message);
-              setOptimisedRoute(JSON.parse(message.event));
+              setOptimisedRoute(JSON.parse(message.event)?.data);
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
@@ -63,6 +63,7 @@ const App: React.FC = () => {
             authorization,
           }),
         );
+        console.log('WebSocket connection established');
       })
       .catch((err) => {
         console.error('WebSocket connection failed:', err);

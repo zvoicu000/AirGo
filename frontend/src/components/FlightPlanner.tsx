@@ -24,11 +24,12 @@ interface FlightPlannerProps {
   isActive: boolean;
   onClose: () => void;
   apiBaseUrl: string;
+  optimisedRoute: RouteResponse | null;
 }
 
 interface FlightResult extends RouteResponse {}
 
-const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBaseUrl }) => {
+const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBaseUrl, optimisedRoute: receivedOptimisedRoute }) => {
   const [startPosition, setStartPosition] = useState<[number, number] | null>(null);
   const [endPosition, setEndPosition] = useState<[number, number] | null>(null);
   const [flightResult, setFlightResult] = useState<FlightResult | null>(null);
@@ -117,6 +118,14 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBas
       setIsOptimising(false);
     }
   };
+
+  // Update optimisedRoute when received from websocket
+  useEffect(() => {
+    if (receivedOptimisedRoute) {
+      setOptimisedRoute(receivedOptimisedRoute);
+      setShowResult(true); // Show the results modal when optimised route is received
+    }
+  }, [receivedOptimisedRoute]);
 
   // Call calculateFlight whenever start or end positions change
   useEffect(() => {

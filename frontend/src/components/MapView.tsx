@@ -201,6 +201,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
           isActive={isFlightPlannerActive} 
           onClose={onCloseFlightPlanner}
           apiBaseUrl={apiBaseUrl}
+          optimisedRoute={optimisedRoute}
         />
 
         {mapData?.items.map((item, index) => {
