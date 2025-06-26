@@ -300,20 +300,167 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
               </button>
             </div>
             
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium text-gray-700">Route Points:</p>
-                <p className="text-lg">{flightResult.route.length}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm font-medium text-gray-700">Population Impact:</p>
-                <p className="text-lg">{flightResult.populationImpact.toLocaleString()}</p>
-              </div>
+            <div className="space-y-4">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="text-left font-medium text-gray-700 pb-2">Metric</th>
+                    <th className="text-right font-medium text-gray-700 pb-2">Planned</th>
+                    <th className="text-right font-medium text-gray-700 pb-2">Optimised</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-1">Distance</td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? flightResult.routeDistance > optimisedRoute.routeDistance
+                            ? 'text-red-600'
+                            : flightResult.routeDistance < optimisedRoute.routeDistance
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {flightResult.routeDistance.toFixed(1)} km
+                    </td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? flightResult.routeDistance < optimisedRoute.routeDistance
+                            ? 'text-red-600'
+                            : flightResult.routeDistance > optimisedRoute.routeDistance
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {optimisedRoute?.routeDistance.toFixed(1)} km
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-1">Population Impact</td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? flightResult.populationImpact > optimisedRoute.populationImpact
+                            ? 'text-red-600'
+                            : flightResult.populationImpact < optimisedRoute.populationImpact
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {flightResult.populationImpact.toLocaleString()}
+                    </td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? flightResult.populationImpact < optimisedRoute.populationImpact
+                            ? 'text-red-600'
+                            : flightResult.populationImpact > optimisedRoute.populationImpact
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {optimisedRoute?.populationImpact.toLocaleString()}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-1">Noise Impact</td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? (flightResult.noiseImpactScore || 0) > (optimisedRoute.noiseImpactScore || 0)
+                            ? 'text-red-600'
+                            : (flightResult.noiseImpactScore || 0) < (optimisedRoute.noiseImpactScore || 0)
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {flightResult.noiseImpactScore?.toFixed(2) || 'N/A'}
+                    </td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? (flightResult.noiseImpactScore || 0) < (optimisedRoute.noiseImpactScore || 0)
+                            ? 'text-red-600'
+                            : (flightResult.noiseImpactScore || 0) > (optimisedRoute.noiseImpactScore || 0)
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {optimisedRoute?.noiseImpactScore?.toFixed(2) || 'N/A'}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-1">Visibility Risk</td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? (flightResult.visibilityRisk || 0) > (optimisedRoute.visibilityRisk || 0)
+                            ? 'text-red-600'
+                            : (flightResult.visibilityRisk || 0) < (optimisedRoute.visibilityRisk || 0)
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {flightResult.visibilityRisk?.toFixed(2) || 'N/A'}
+                    </td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? (flightResult.visibilityRisk || 0) < (optimisedRoute.visibilityRisk || 0)
+                            ? 'text-red-600'
+                            : (flightResult.visibilityRisk || 0) > (optimisedRoute.visibilityRisk || 0)
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {optimisedRoute?.visibilityRisk?.toFixed(2) || 'N/A'}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-1">Wind Risk</td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? (flightResult.windRisk || 0) > (optimisedRoute.windRisk || 0)
+                            ? 'text-red-600'
+                            : (flightResult.windRisk || 0) < (optimisedRoute.windRisk || 0)
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {flightResult.windRisk?.toFixed(2) || 'N/A'}
+                    </td>
+                    <td
+                      className={`text-right ${
+                        optimisedRoute
+                          ? (flightResult.windRisk || 0) < (optimisedRoute.windRisk || 0)
+                            ? 'text-red-600'
+                            : (flightResult.windRisk || 0) > (optimisedRoute.windRisk || 0)
+                              ? 'text-green-600'
+                              : 'text-gray-600'
+                          : ''
+                      }`}
+                    >
+                      {optimisedRoute?.windRisk?.toFixed(2) || 'N/A'}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
               
               <div className="pt-3 border-t">
                 <p className="text-sm text-gray-600">
-                  The optimised route is displayed on the map in blue.
+                  Hover over the routes to highlight them. Lower values are shown in green, higher values in red.
                 </p>
               </div>
             </div>
