@@ -11,7 +11,7 @@ const MAXIMUM_DYNAMODB_FETCH = 10; // Maximum number of fetches to prevent infin
 const DYNAMODB_FETCH_LIMIT = 1000; // Maximum items to fetch per request
 const STEP_DISTANCE = 1000; // meters per step
 const ANGLE_RANGE = 30; // degrees
-const SEARCH_ITERATIONS = 10; // angles to try
+const SEARCH_ITERATIONS = 5; // angles to try
 const MAX_DEVIATION_RATIO = 0.2; // 20% of straight-line length
 
 export type Point = { lat: number; lon: number };

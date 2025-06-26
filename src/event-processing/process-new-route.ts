@@ -26,22 +26,14 @@ import {
   assessWeatherImpact,
 } from '../shared';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { DynamoDBStreamEvent } from 'aws-lambda';
 
-// Setup the DynamoDB Document client
-const marshallOptions = {
-  convertEmptyValues: false, // Whether to automatically convert empty strings, blobs, and sets to `null`.
-  removeUndefinedValues: true, // Whether to remove undefined values while marshalling.
-  convertClassInstanceToMap: true, // Whether to convert typeof object to map attribute.
-};
-const unmarshallOptions = {
-  wrapNumbers: false, // Whether to return numbers as a string instead of converting them to native JavaScript numbers.
-};
-const translateConfig = { marshallOptions, unmarshallOptions };
+const ROUTES_TABLE = process.env.ROUTES_TABLE;
+
 const client = new DynamoDBClient();
-const ddb = DynamoDBDocumentClient.from(client, translateConfig);
+const ddb = DynamoDBDocumentClient.from(client);
 
 const PARTITION_KEY_HASH_PRECISION = parseFloat(process.env.PARTITION_KEY_HASH_PRECISION || '5');
 
@@ -98,4 +90,29 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<undefined> =>
     visibilityRisk: visibilityRisk,
     windRisk: windRisk,
   });
+
+  // Step 5: Save the optimised route back to DynamoDB.
+  // This creates an update record in the routes table, so does not trigger this Lambda again.
+  const params = new UpdateCommand({
+    TableName: ROUTES_TABLE,
+    Key: {
+      PK: routeRecord.PK,
+    },
+    UpdateExpression: `SET 
+      optimisedRoute = :optimisedRoute,
+      optimisedRouteDistance = :optimisedRouteDistance,
+      populationImpact = :populationImpact,
+      noiseImpact = :noiseImpact,
+      visibilityRisk = :visibilityRisk,
+      windRisk = :windRisk`,
+    ExpressionAttributeValues: {
+      ':optimisedRoute': optimisedRoute,
+      ':optimisedRouteDistance': routeDistance,
+      ':populationImpact': populationImpact,
+      ':noiseImpact': noiseImpact,
+      ':visibilityRisk': visibilityRisk,
+      ':windRisk': windRisk,
+    },
+  });
+  await ddb.send(params);
 };
