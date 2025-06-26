@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, ZoomControl, Rectangle, Marker, Popup, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { ApiResponse, PopulationData, WeatherData } from '../types';
+import { ApiResponse, PopulationData, WeatherData, RouteResponse } from '../types';
 import WeatherPopup from './WeatherPopup';
 import FlightPlanner from './FlightPlanner';
 
@@ -22,20 +22,14 @@ const weatherIcon = new L.Icon({
   popupAnchor: [0, -16],
 });
 
-declare global {
-  interface Window {
-    API_BASE_URL: string;
-  }
-}
-
-const API_BASE_URL = window.API_BASE_URL;
-
 interface MapViewProps {
   isFlightPlannerActive: boolean;
   onCloseFlightPlanner: () => void;
+  optimisedRoute: RouteResponse | null;
+  apiBaseUrl: string;
 }
 
-const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightPlanner }) => {
+const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightPlanner, optimisedRoute, apiBaseUrl }) => {
   const [mapData, setMapData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +50,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
     try {
       const southWest = bounds.getSouthWest();
       const northEast = bounds.getNorthEast();
-      const url = `${API_BASE_URL}/spatial/bounding-box?latMin=${southWest.lat}&lonMin=${southWest.lng}&latMax=${northEast.lat}&lonMax=${northEast.lng}`;
+      const url = `${apiBaseUrl}/spatial/bounding-box?latMin=${southWest.lat}&lonMin=${southWest.lng}&latMax=${northEast.lat}&lonMax=${northEast.lng}`;
 
       const response = await fetch(url);
 
@@ -206,6 +200,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
         <FlightPlanner 
           isActive={isFlightPlannerActive} 
           onClose={onCloseFlightPlanner}
+          apiBaseUrl={apiBaseUrl}
         />
 
         {mapData?.items.map((item, index) => {

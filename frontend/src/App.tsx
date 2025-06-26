@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import MapView from './components/MapView';
+import { RouteResponse } from './types';
 
 import output from './cdk-output.json'
 
@@ -12,6 +13,8 @@ const authorization = { 'x-api-key': EVENTS_API_KEY, host: EVENTS_HTTP_DOMAIN }
 
 const App: React.FC = () => {
   const [isFlightPlannerActive, setIsFlightPlannerActive] = useState(false);
+  const [optimisedRoute, setOptimisedRoute] = useState<RouteResponse | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   // construct the protocol header for the connection
   function getAuthProtocol() {
@@ -31,8 +34,16 @@ const App: React.FC = () => {
         ]);
         socket.onopen = () => resolve(socket);
         socket.onclose = (event) => reject(new Error(event.reason));
-        socket.onmessage = (_evt) => {
-          console.log('Received message:', _evt.data);
+        socket.onmessage = (evt) => {
+          try {
+            const message = JSON.parse(evt.data);
+            if (message.type === 'data') {
+              console.log('Received WebSocket message:', message);
+              setOptimisedRoute(JSON.parse(message.event));
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+          }
         };
       });
     };
@@ -42,6 +53,7 @@ const App: React.FC = () => {
     connectWebSocket()
       .then((socket) => {
         ws = socket;
+        wsRef.current = socket;
         // subscribe to `/default/*`
         ws.send(
           JSON.stringify({
@@ -85,7 +97,12 @@ const App: React.FC = () => {
       </header>
       
       <main className="h-screen">
-        <MapView isFlightPlannerActive={isFlightPlannerActive} onCloseFlightPlanner={() => setIsFlightPlannerActive(false)} />
+        <MapView 
+          isFlightPlannerActive={isFlightPlannerActive} 
+          onCloseFlightPlanner={() => setIsFlightPlannerActive(false)}
+          optimisedRoute={optimisedRoute}
+          apiBaseUrl={REST_API_URL}
+        />
       </main>
     </div>
   );

@@ -23,11 +23,12 @@ const endIcon = new L.Icon({
 interface FlightPlannerProps {
   isActive: boolean;
   onClose: () => void;
+  apiBaseUrl: string;
 }
 
 interface FlightResult extends RouteResponse {}
 
-const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
+const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose, apiBaseUrl }) => {
   const [startPosition, setStartPosition] = useState<[number, number] | null>(null);
   const [endPosition, setEndPosition] = useState<[number, number] | null>(null);
   const [flightResult, setFlightResult] = useState<FlightResult | null>(null);
@@ -68,8 +69,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
 
     setIsCalculating(true);
     try {
-      const API_BASE_URL = window.API_BASE_URL;
-      const url = `${API_BASE_URL}/routes/assess-route?latStart=${startPosition[0]}&lonStart=${startPosition[1]}&latEnd=${endPosition[0]}&lonEnd=${endPosition[1]}`;
+      const url = `${apiBaseUrl}/routes/assess-route?latStart=${startPosition[0]}&lonStart=${startPosition[1]}&latEnd=${endPosition[0]}&lonEnd=${endPosition[1]}`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to calculate flight');
       
@@ -81,15 +81,14 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     } finally {
       setIsCalculating(false);
     }
-  }, [startPosition, endPosition]);
+  }, [startPosition, endPosition, apiBaseUrl]);
 
   const optimiseRoute = async () => {
     if (!startPosition || !endPosition) return;
 
     setIsOptimising(true);
     try {
-      const API_BASE_URL = window.API_BASE_URL;
-      const response = await fetch(`${API_BASE_URL}/routes/optimise-route`, {
+      const response = await fetch(`${apiBaseUrl}/routes/optimise-route`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

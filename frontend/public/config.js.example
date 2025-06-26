@@ -1,1 +1,0 @@
-window.API_BASE_URL = 'https://abcdefghijk.execute-api.eu-west-1.amazonaws.com/prod';
