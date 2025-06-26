@@ -105,11 +105,11 @@ const RouteOverlay: React.FC<RouteOverlayProps> = ({ routeData, optimisedData, h
   return (
     <div className="absolute bottom-7 left-1/2 z-[1000] bg-white/70 backdrop-blur-md shadow-md p-4 border-2 border-gray-200 max-w-[800px] w-[calc(100%-80px)] transform -translate-x-1/2">
       <div className="grid grid-cols-5 gap-4">
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center justify-center h-full">
           <span className="text-lg font-semibold">{displayData.routeDistance.toFixed(1)}</span>
           <span className="text-sm text-gray-600">Distance (km)</span>
         </div>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center justify-center h-full">
           <span className="text-lg font-semibold">{displayData.populationImpact.toLocaleString()}</span>
           <span className="text-sm text-gray-600">Population Impact</span>
         </div>
