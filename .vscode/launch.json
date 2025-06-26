@@ -9,12 +9,12 @@
         "target": "code",
         "architecture": "arm64",
         "projectRoot": "dist",
-        "lambdaHandler": "queries/get-bounding-box.handler"
+        "lambdaHandler": "api/get-bounding-box.handler"
       },
       "lambda": {
         "runtime": "nodejs22.x",
         "payload": {
-          "path": "${workspaceFolder}/test/payloads/queries/get-bounding-box-event.json"
+          "path": "${workspaceFolder}/test/payloads/api/get-bounding-box-event.json"
         }
       },
       "sam": {
@@ -33,12 +33,12 @@
         "target": "code",
         "architecture": "arm64",
         "projectRoot": "dist",
-        "lambdaHandler": "queries/assess-route.handler"
+        "lambdaHandler": "api/assess-route.handler"
       },
       "lambda": {
         "runtime": "nodejs22.x",
         "payload": {
-          "path": "${workspaceFolder}/test/payloads/queries/assess-route-event.json"
+          "path": "${workspaceFolder}/test/payloads/api/assess-route-event.json"
         }
       },
       "sam": {
@@ -57,12 +57,12 @@
         "target": "code",
         "architecture": "arm64",
         "projectRoot": "dist",
-        "lambdaHandler": "queries/optimise-route.handler"
+        "lambdaHandler": "api/optimise-route.handler"
       },
       "lambda": {
         "runtime": "nodejs22.x",
         "payload": {
-          "path": "${workspaceFolder}/test/payloads/queries/optimise-route-event.json"
+          "path": "${workspaceFolder}/test/payloads/api/optimise-route-event.json"
         }
       },
       "sam": {

@@ -42,7 +42,7 @@ export class LambdaResources extends NestedStack {
     // Create the ProcessRoute Lambda function
     this.assessRoute = new CustomLambda(this, 'AssessRouteFunction', {
       envConfig: envConfig,
-      source: 'src/queries/assess-route.ts',
+      source: 'src/api/assess-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
         PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
@@ -55,7 +55,7 @@ export class LambdaResources extends NestedStack {
     // Create the OptimiseRoute Lambda function
     this.optimiseRoute = new CustomLambda(this, 'OptimiseRouteFunction', {
       envConfig: envConfig,
-      source: 'src/route-engine/optimise-route.ts',
+      source: 'src/api/optimise-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
         PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),
@@ -68,7 +68,7 @@ export class LambdaResources extends NestedStack {
     // Create the GetBoundingBox Lambda function
     this.getBoundingBox = new CustomLambda(this, 'GetBoundingBoxFunction', {
       envConfig: envConfig,
-      source: 'src/queries/get-bounding-box.ts',
+      source: 'src/api/get-bounding-box.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
         PARTITION_KEY_HASH_PRECISION: envConfig.partitionKeyHashPrecision?.toString(),

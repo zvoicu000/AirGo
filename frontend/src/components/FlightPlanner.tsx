@@ -58,7 +58,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     setIsCalculating(true);
     try {
       const API_BASE_URL = window.API_BASE_URL;
-      const url = `${API_BASE_URL}/spatial/route?latStart=${startPosition[0]}&lonStart=${startPosition[1]}&latEnd=${endPosition[0]}&lonEnd=${endPosition[1]}`;
+      const url = `${API_BASE_URL}/routes/assess-route?latStart=${startPosition[0]}&lonStart=${startPosition[1]}&latEnd=${endPosition[0]}&lonEnd=${endPosition[1]}`;
       const response = await fetch(url);
       if (!response.ok) throw new Error('Failed to calculate flight');
       

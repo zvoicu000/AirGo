@@ -1,4 +1,4 @@
-import { handler } from '../../../src/queries/get-bounding-box';
+import { handler } from '../../../src/api/get-bounding-box';
 import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 

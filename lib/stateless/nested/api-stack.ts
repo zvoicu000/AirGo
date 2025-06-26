@@ -43,9 +43,13 @@ export class ApiResources extends NestedStack {
     // Add routes resource
     const routes = this.api.root.addResource('routes');
 
+    // Add route assessment resource
+    const assessRouteResource = routes.addResource('assess-route');
+    assessRouteResource.addMethod('GET', new LambdaIntegration(assessRoute));
+
     // Add optimise route endpoint
-    const optimise = routes.addResource('optimise');
-    optimise.addMethod('POST', new LambdaIntegration(optimiseRoute));
+    const optimiseRouteResource = routes.addResource('optimise-route');
+    optimiseRouteResource.addMethod('POST', new LambdaIntegration(optimiseRoute));
 
     // Add spatial queries resource
     const spatial = this.api.root.addResource('spatial');
@@ -53,10 +57,6 @@ export class ApiResources extends NestedStack {
     // Add bounding box query endpoint
     const boundingBox = spatial.addResource('bounding-box');
     boundingBox.addMethod('GET', new LambdaIntegration(getBoundingBox));
-
-    // Add route assessment resource
-    const assessRouteResource = spatial.addResource('route');
-    assessRouteResource.addMethod('GET', new LambdaIntegration(assessRoute));
 
     // Save the API URL to the System Manager Parameter Store
     new StringParameter(this, 'ApiUrlParameter', {
