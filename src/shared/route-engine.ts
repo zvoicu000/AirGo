@@ -158,15 +158,28 @@ export function getPointsNearRoute(routePoints: Array<Point>, geoPoints: Array<a
   return uniqueResults;
 }
 
-export async function createRouteRecord(ddb: DynamoDBDocumentClient, route: Array<Point>): Promise<void> {
+/**
+ * Creates a new route record in the DynamoDB table with a unique route ID.
+ *
+ * @param ddb - The DynamoDBDocumentClient instance used to interact with DynamoDB.
+ * @param route - An array of `Point` objects representing the route to be stored.
+ * @returns A promise that resolves to the generated route ID as a string.
+ *
+ * @remarks
+ * The route record will have a TTL (time-to-live) of 7 days from the time of creation.
+ */
+export async function createRouteRecord(ddb: DynamoDBDocumentClient, route: Array<Point>): Promise<string> {
+  const routeId = ulid();
   const params = new PutCommand({
     TableName: ROUTES_TABLE,
     Item: {
-      PK: ulid(),
+      PK: routeId,
       routePoints: route,
+      ttl: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days TTL
     },
   });
   await ddb.send(params);
+  return routeId;
 }
 
 /**
@@ -410,6 +423,10 @@ function perpendicularDistance(p: Point, a: Point, b: Point): number {
  * @returns A promise that resolves to an array of `Point` objects representing the optimised route from start to end.
  */
 export async function findOptimisedRoute(start: Point, end: Point, spatialData: any[]): Promise<Point[]> {
+  // Record the start time for the algorithm
+  const startTime = Date.now();
+  logger.info('Starting route optimisation', { startTime });
+
   const straightDist = getDistance(start, end);
   const maxDeviation = straightDist * MAX_DEVIATION_RATIO;
 
@@ -444,6 +461,12 @@ export async function findOptimisedRoute(start: Point, end: Point, spatialData: 
         node = node.parent;
       }
       path.push(end);
+      logger.info('Route optimisation completed', {
+        duration: Date.now() - startTime,
+        pathLength: path.length,
+        straightDistance: straightDist,
+        maxDeviation,
+      });
       return path;
     }
 

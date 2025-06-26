@@ -108,9 +108,9 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
 
       if (!response.ok) throw new Error('Failed to optimise route');
       
-      const result = await response.json();
-      setOptimisedRoute(result);
-      setShowResult(true);
+      //const result = await response.json();
+      //setOptimisedRoute(result);
+      //setShowResult(true);
     } catch (error) {
       console.error('Error optimising route:', error);
       alert('Failed to optimise route. Please try again.');

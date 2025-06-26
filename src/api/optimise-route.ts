@@ -59,43 +59,51 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   };
 
   // Create a new record in the routes table for this request
-  await createRouteRecord(ddb, [startPoint, endPoint]);
-
-  // Step 1: Get all GeoHash prefixes covering the route
-  const hashPrefixes = getRouteGeoHashes(startPoint, endPoint, PARTITION_KEY_HASH_PRECISION);
-  logger.info('Geohash Prefixes intercepting the route', { count: hashPrefixes.length });
-
-  // Step 2: Query DynamoDB for items in the geohashes
-  const results = await fetchGeoHashItemsFromDynamoDB(ddb, hashPrefixes);
-  logger.info('Queried Results from GeoHashes', { count: results.length });
-
-  // Step 3: Find optimised route
-  const optimisedRoute = await findOptimisedRoute(startPoint, endPoint, results);
-
-  // Step 4: Evaluate the optimised route
-  const routeDistance = await getRouteDistance(optimisedRoute);
-  const routePointsOfInterest = getPointsNearRoute(optimisedRoute, results);
-  const populationImpact = await assessPopulationImpact(routePointsOfInterest);
-  const noiseImpact = await assessNoiseImpact(populationImpact);
-  const { visibilityRisk, windRisk } = await assessWeatherImpact(routePointsOfInterest);
-
-  logger.info('Route Evaluation Complete', {
-    routeDistance: routeDistance,
-    populationImpact: populationImpact,
-    noiseImpactScore: noiseImpact,
-    visibilityRisk: visibilityRisk,
-    windRisk: windRisk,
-  });
+  const routeId = await createRouteRecord(ddb, [startPoint, endPoint]);
 
   return {
     body: JSON.stringify({
-      route: optimisedRoute,
-      routeDistance: routeDistance,
-      populationImpact: populationImpact,
-      ...(noiseImpact && { noiseImpactScore: noiseImpact }),
-      ...(visibilityRisk && { visibilityRisk: visibilityRisk }),
-      ...(windRisk && { windRisk: windRisk }),
+      message: 'Route optimisation started successfully.',
+      routeId: routeId,
     }),
     ...RETURN_HEADERS,
   };
+
+  // // Step 1: Get all GeoHash prefixes covering the route
+  // const hashPrefixes = getRouteGeoHashes(startPoint, endPoint, PARTITION_KEY_HASH_PRECISION);
+  // logger.info('Geohash Prefixes intercepting the route', { count: hashPrefixes.length });
+
+  // // Step 2: Query DynamoDB for items in the geohashes
+  // const results = await fetchGeoHashItemsFromDynamoDB(ddb, hashPrefixes);
+  // logger.info('Queried Results from GeoHashes', { count: results.length });
+
+  // // Step 3: Find optimised route
+  // const optimisedRoute = await findOptimisedRoute(startPoint, endPoint, results);
+
+  // // Step 4: Evaluate the optimised route
+  // const routeDistance = await getRouteDistance(optimisedRoute);
+  // const routePointsOfInterest = getPointsNearRoute(optimisedRoute, results);
+  // const populationImpact = await assessPopulationImpact(routePointsOfInterest);
+  // const noiseImpact = await assessNoiseImpact(populationImpact);
+  // const { visibilityRisk, windRisk } = await assessWeatherImpact(routePointsOfInterest);
+
+  // logger.info('Route Evaluation Complete', {
+  //   routeDistance: routeDistance,
+  //   populationImpact: populationImpact,
+  //   noiseImpactScore: noiseImpact,
+  //   visibilityRisk: visibilityRisk,
+  //   windRisk: windRisk,
+  // });
+
+  // return {
+  //   body: JSON.stringify({
+  //     route: optimisedRoute,
+  //     routeDistance: routeDistance,
+  //     populationImpact: populationImpact,
+  //     ...(noiseImpact && { noiseImpactScore: noiseImpact }),
+  //     ...(visibilityRisk && { visibilityRisk: visibilityRisk }),
+  //     ...(windRisk && { windRisk: windRisk }),
+  //   }),
+  //   ...RETURN_HEADERS,
+  // };
 };

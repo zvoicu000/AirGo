@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { NestedStack, NestedStackProps } from 'aws-cdk-lib';
+import { Duration, NestedStack, NestedStackProps } from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { EnvironmentConfig, Stage } from '../../../config';
 import { CustomLambda } from '../../constructs';
@@ -25,8 +25,9 @@ export class EventResources extends NestedStack {
     // Create the OptimiseRoute Lambda function
     this.optimiseNewRoute = new CustomLambda(this, 'OptimiseNewRouteFunction', {
       envConfig: envConfig,
-      memorySize: 2048, // Increase CPU for A* algorithm
-      source: 'src/api/optimise-route.ts',
+      memorySize: 3008, // 3GB
+      timeout: Duration.seconds(300), // 5 minutes
+      source: 'src/event-processing/process-new-route.ts',
       environmentVariables: {
         SPATIAL_DATA_TABLE: spatialDataTable.tableName,
         ROUTES_TABLE: routesTable.tableName,

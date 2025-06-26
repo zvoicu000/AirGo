@@ -75,6 +75,30 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
+      "name": "Process New Route",
+      "preLaunchTask": "Build",
+      "invokeTarget": {
+        "target": "code",
+        "architecture": "arm64",
+        "projectRoot": "dist",
+        "lambdaHandler": "event-processing/process-new-route.handler"
+      },
+      "lambda": {
+        "runtime": "nodejs22.x",
+        "payload": {
+          "path": "${workspaceFolder}/test/payloads/event-processing/process-new-route-event.json"
+        }
+      },
+      "sam": {
+        "localArguments": [
+          "--container-env-vars",
+          "${workspaceFolder}/local.env.json"
+        ]
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
       "name": "Load Weather Data",
       "preLaunchTask": "Build",
       "invokeTarget": {
