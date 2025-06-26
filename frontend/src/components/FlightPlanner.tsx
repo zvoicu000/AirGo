@@ -31,12 +31,12 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
   const [startPosition, setStartPosition] = useState<[number, number] | null>(null);
   const [endPosition, setEndPosition] = useState<[number, number] | null>(null);
   const [flightResult, setFlightResult] = useState<FlightResult | null>(null);
-  const [optimizedRoute, setOptimizedRoute] = useState<FlightResult | null>(null);
+  const [optimisedRoute, setOptimisedRoute] = useState<FlightResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isOptimising, setIsOptimising] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [placingMarker, setPlacingMarker] = useState<'start' | 'end' | null>(null);
-  const [hoveredRoute, setHoveredRoute] = useState<'original' | 'optimized' | null>(null);
+  const [hoveredRoute, setHoveredRoute] = useState<'original' | 'optimised' | null>(null);
 
   // Set initial marker placement when dialog becomes active
   useEffect(() => {
@@ -83,10 +83,10 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     }
   };
 
-  const optimizeRoute = async () => {
+  const optimiseRoute = async () => {
     if (!startPosition || !endPosition) return;
 
-    setIsOptimizing(true);
+    setIsOptimising(true);
     try {
       const API_BASE_URL = window.API_BASE_URL;
       const response = await fetch(`${API_BASE_URL}/routes/optimise-route`, {
@@ -106,16 +106,16 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
         })
       });
 
-      if (!response.ok) throw new Error('Failed to optimize route');
+      if (!response.ok) throw new Error('Failed to optimise route');
       
       const result = await response.json();
-      setOptimizedRoute(result);
+      setOptimisedRoute(result);
       setShowResult(true);
     } catch (error) {
-      console.error('Error optimizing route:', error);
-      alert('Failed to optimize route. Please try again.');
+      console.error('Error optimising route:', error);
+      alert('Failed to optimise route. Please try again.');
     } finally {
-      setIsOptimizing(false);
+      setIsOptimising(false);
     }
   };
 
@@ -130,7 +130,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
     setStartPosition(null);
     setEndPosition(null);
     setFlightResult(null);
-    setOptimizedRoute(null);
+    setOptimisedRoute(null);
     setShowResult(false);
     setHoveredRoute(null);
   };
@@ -146,7 +146,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
       {/* Flight Planning Panel */}
       <div className="absolute top-24 left-4 z-[1000] bg-white/70 backdrop-blur-md shadow-md p-4 w-80 border-2 border-gray-200">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Create Flight</h3>
+          <h3 className="text-lg font-semibold">Plan your Operation</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
         </div>
         
@@ -189,18 +189,11 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
           
           <div className="flex space-x-2">
             <button
-              onClick={calculateFlight}
-              disabled={!startPosition || !endPosition || isCalculating}
-              className="flex-1 bg-blue-600 text-white p-2 rounded text-sm hover:bg-blue-700 disabled:bg-gray-300"
-            >
-              {isCalculating ? 'Calculating...' : 'Calculate Flight'}
-            </button>
-            <button
-              onClick={optimizeRoute}
-              disabled={!flightResult || isOptimizing}
+              onClick={optimiseRoute}
+              disabled={!flightResult || isOptimising}
               className="flex-1 bg-green-600 text-white p-2 rounded text-sm hover:bg-green-700 disabled:bg-gray-300"
             >
-              {isOptimizing ? 'Optimizing...' : 'Optimize Route'}
+              {isOptimising ? 'Optimising...' : 'Optimise Route'}
             </button>
             <button
               onClick={clearFlight}
@@ -268,7 +261,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
           pathOptions={{ 
             color: '#3B82F6', 
             weight: hoveredRoute === 'original' ? 4 : 3, 
-            opacity: hoveredRoute === 'optimized' ? 0.4 : 0.8 
+            opacity: hoveredRoute === 'optimised' ? 0.4 : 0.8 
           }}
           eventHandlers={{
             mouseover: () => setHoveredRoute('original'),
@@ -278,16 +271,16 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
       )}
 
       {/* Optimised Flight Route */}
-      {optimizedRoute && (
+      {optimisedRoute && (
         <Polyline
-          positions={optimizedRoute.route.map(p => [p.lat, p.lon])}
+          positions={optimisedRoute.route.map(p => [p.lat, p.lon])}
           pathOptions={{ 
             color: '#22C55E', 
-            weight: hoveredRoute === 'optimized' ? 4 : 3, 
+            weight: hoveredRoute === 'optimised' ? 4 : 3, 
             opacity: hoveredRoute === 'original' ? 0.4 : 0.8 
           }}
           eventHandlers={{
-            mouseover: () => setHoveredRoute('optimized'),
+            mouseover: () => setHoveredRoute('optimised'),
             mouseout: () => setHoveredRoute(null)
           }}
         />
@@ -298,7 +291,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[2000]">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Flight Calculation Results</h3>
+              <h3 className="text-lg font-semibold">Flight Optimisation Results</h3>
               <button 
                 onClick={() => setShowResult(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -340,7 +333,7 @@ const FlightPlanner: React.FC<FlightPlannerProps> = ({ isActive, onClose }) => {
       {/* Route Overlay */}
       <RouteOverlay 
         routeData={flightResult} 
-        optimizedData={optimizedRoute}
+        optimisedData={optimisedRoute}
         hoveredRoute={hoveredRoute}
       />
     </>

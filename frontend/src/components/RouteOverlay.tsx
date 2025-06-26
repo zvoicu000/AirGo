@@ -92,15 +92,15 @@ const RiskDial: React.FC<RiskDialProps> = ({ value, label }) => {
 
 interface RouteOverlayProps {
   routeData: RouteResponse | null;
-  optimizedData: RouteResponse | null;
-  hoveredRoute: 'original' | 'optimized' | null;
+  optimisedData: RouteResponse | null;
+  hoveredRoute: 'original' | 'optimised' | null;
 }
 
-const RouteOverlay: React.FC<RouteOverlayProps> = ({ routeData, optimizedData, hoveredRoute }) => {
+const RouteOverlay: React.FC<RouteOverlayProps> = ({ routeData, optimisedData, hoveredRoute }) => {
   if (!routeData) return null;
 
   // Determine which data to display based on hover state
-  const displayData = hoveredRoute === 'optimized' && optimizedData ? optimizedData : routeData;
+  const displayData = hoveredRoute === 'optimised' && optimisedData ? optimisedData : routeData;
 
   return (
     <div className="absolute bottom-7 left-1/2 z-[1000] bg-white/70 backdrop-blur-md shadow-md p-4 border-2 border-gray-200 max-w-[800px] w-[calc(100%-80px)] transform -translate-x-1/2">
@@ -126,9 +126,9 @@ const RouteOverlay: React.FC<RouteOverlayProps> = ({ routeData, optimizedData, h
           label="Wind Risk"
         />
       </div>
-      {optimizedData && (
+      {optimisedData && (
         <div className="mt-2 text-sm text-center text-gray-600">
-          {hoveredRoute === 'optimized' ? 'Showing optimized route metrics' : 'Showing original route metrics'} - Hover over routes to compare
+          {hoveredRoute === 'optimised' ? 'Showing optimised route metrics' : 'Showing original route metrics'} - Hover over routes to compare
         </div>
       )}
     </div>

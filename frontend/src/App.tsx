@@ -9,8 +9,8 @@ const App: React.FC = () => {
       <header className="fixed top-0 left-0 right-0 z-[1000] bg-white/70 backdrop-blur-md shadow-md">
         <div className="px-6 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Drone Planner</h1>
-            <p className="text-sm text-gray-600">Interactive map showing population density and weather data</p>
+            <h1 className="text-2xl font-bold text-gray-800">Drone SoundAware</h1>
+            <p className="text-sm text-gray-600">Route with Respect — Minimise Noise, Maximise Impact</p>
           </div>
           <button
             onClick={() => setIsFlightPlannerActive(!isFlightPlannerActive)}
@@ -20,7 +20,7 @@ const App: React.FC = () => {
                 : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
             }`}
           >
-            {isFlightPlannerActive ? 'Close Flight Planner' : 'Open Flight Planner'}
+            {isFlightPlannerActive ? 'Close Operations Planner' : 'Operations Planner'}
           </button>
         </div>
       </header>
