@@ -305,7 +305,7 @@ export default function RoutePlanner({
       
       {isCalculating && <Spinner size="lg" />}
 
-      <div className="w-80 bg-black/30 backdrop-blur-xl border-r border-white/10 flex flex-col max-h-[calc(100vh-7rem)] rounded-lg shadow-xl overflow-hidden">
+      <div className="w-80 bg-gray-900/80 backdrop-blur-xl border-r border-white/10 flex flex-col max-h-[calc(100vh-7rem)] rounded-lg shadow-xl overflow-hidden">
         {/* Planning Controls */}
         <div className="p-6 border-b border-white/10">
           <h2 className="text-lg font-semibold mb-4 flex items-center">

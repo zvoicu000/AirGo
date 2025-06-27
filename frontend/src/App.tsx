@@ -86,7 +86,7 @@ const App: React.FC = () => {
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
       {/* Header - Fixed position */}
-      <div className="fixed top-2 left-4 right-4 z-[1000] bg-black/30 backdrop-blur-xl border-r border-white/10 flex flex-col">
+      <div className="fixed top-2 left-4 right-4 z-[1000] bg-gray-900/80 backdrop-blur-xl border-r border-white/10 flex flex-col rounded-lg shadow-xl">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center space-x-3">
             <div className="p-1">
@@ -98,7 +98,7 @@ const App: React.FC = () => {
               <h1 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 Drone SoundAware
               </h1>
-              <p className="text-sm text-gray-400">Route with Respect — Minimise Noise, Maximise Impact</p>
+                <p className="text-sm text-gray-200 italic">Route with Respect — Minimise Noise, Maximise Impact</p>
             </div>
           </div>
           

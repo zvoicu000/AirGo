@@ -188,7 +188,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors | &copy; Ian Brumby <a href="https://crockwell.com" target="_blank">Crockwell Solutions</a> | Carnell, E. Tomlinson, S.J. Reis, S. (2025). <a href="https://www.data.gov.uk/dataset/076cef76-337c-4e5f-8123-ef660e53a836/uk-gridded-population-at-1-km-resolution-for-2021-based-on-census-2021-2022-and-land-cover-2021" target="_blank">UK Gridded Population Data</a>'
-          url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png"
+          url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
         />
 
         <ZoomControl position="bottomright" />
