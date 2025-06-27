@@ -25,3 +25,7 @@ const statelessStack = new StatelessStack(app, 'StatelessStack', {
 
 // Ensure the stateful stack is deployed before the stateless stack
 statelessStack.addDependency(statefulStack);
+
+// Tag all resources in CloudFormation with the stage name
+cdk.Tags.of(app).add('service', 'drone-delivery-service-backend');
+cdk.Tags.of(app).add('stage', `${stage}`);

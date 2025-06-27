@@ -14,3 +14,7 @@ new FrontendStack(app, 'FrontendStack', {
   stage: stage,
   envConfig: envConfig,
 });
+
+// Tag all resources in CloudFormation with the stage name
+cdk.Tags.of(app).add('service', 'drone-delivery-service-frontend');
+cdk.Tags.of(app).add('stage', `${stage}`);
