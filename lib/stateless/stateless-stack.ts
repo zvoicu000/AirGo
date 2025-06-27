@@ -1,7 +1,11 @@
 /*
- * Stateless Stack
- * This is the parent stack that contains all the stateless resources.
- * This includes Lambda functions, API Gateway and EventBridge.
+ * CDK Stack - Stateless Resources
+ *
+ * This CDK stack sets up the stateless backend resources for the Drone Delivery Service.
+ * This contains the Lambda functions, API Gateway, and EventBridge resources.
+ * This is completed using nested stacks
+ *
+ * This software is licensed under the GNU General Public License v3.0.
  */
 
 import { CfnOutput, Stack, StackProps, Aspects } from 'aws-cdk-lib';

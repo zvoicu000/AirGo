@@ -1,3 +1,12 @@
+/*
+ * CDK Nested Stack - API Resources
+ *
+ * This CDK nested stack sets up the API resources for the Drone Delivery Service.
+ * This contains the API Gateway and routes for assessing and optimising flight routes,
+ *
+ * This software is licensed under the GNU General Public License v3.0.
+ */
+
 import { Construct } from 'constructs';
 import { NestedStack, NestedStackProps } from 'aws-cdk-lib';
 import { RestApi, LambdaIntegration } from 'aws-cdk-lib/aws-apigateway';

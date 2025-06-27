@@ -1,3 +1,12 @@
+/*
+ * CDK Stack - Frontend Resources
+ *
+ * This CDK stack sets up the frontend resources for the Drone Delivery Service.
+ * This contains the S3 bucket for hosting the React application and the CloudFront distribution for serving it.
+ *
+ * This software is licensed under the GNU General Public License v3.0.
+ */
+
 import { Construct } from 'constructs';
 import { Stack, StackProps, RemovalPolicy } from 'aws-cdk-lib';
 import { Bucket } from 'aws-cdk-lib/aws-s3';

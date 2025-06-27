@@ -1,8 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
- * Lambda function to load weather data from METAR reports into DynamoDB
+ * Load Weather Data Lambda Function
+ *
+ * This Lambda function is triggered on a schedule to fetch and process weather data from a specified source.
+ * The function retrieves relevant data from the weather data source, processes it, and stores it in the DynamoDB table.
+ *
+ * This software is licensed under the GNU General Public License v3.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as xml2js from 'xml2js';
 import * as zlib from 'zlib';
 import axios from 'axios';

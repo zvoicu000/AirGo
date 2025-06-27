@@ -1,3 +1,12 @@
+/*
+ * CDK Nested Stack - Lambda Resources
+ *
+ * This CDK nested stack sets up the Lambda resources for the Drone Delivery Service.
+ * This contains the Lambda functions and any associated resources such as EventBridge schedules and IAM roles.
+ *
+ * This software is licensed under the GNU General Public License v3.0.
+ */
+
 import { Construct } from 'constructs';
 import { NestedStack, NestedStackProps } from 'aws-cdk-lib';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';

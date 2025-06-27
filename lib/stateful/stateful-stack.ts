@@ -1,6 +1,10 @@
 /*
- * Stateful Stack
- * This is the parent stack that contains all the stateful resources.
+ * CDK Stack - Stateful Resources
+ *
+ * This CDK stack sets up the stateful backend resources for the Drone Delivery Service.
+ * This contains the DynamoDB tables for storing spatial data and flight routes.
+ *
+ * This software is licensed under the GNU General Public License v3.0.
  */
 
 import * as path from 'path';
