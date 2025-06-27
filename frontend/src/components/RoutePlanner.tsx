@@ -305,7 +305,7 @@ export default function RoutePlanner({
       
       {isCalculating && <Spinner size="lg" />}
 
-      <div className="w-80 bg-black/30 backdrop-blur-xl border-r border-white/10 flex flex-col">
+      <div className="w-80 bg-black/30 backdrop-blur-xl border-r border-white/10 flex flex-col max-h-[calc(100vh-7rem)] rounded-lg shadow-xl overflow-hidden">
         {/* Planning Controls */}
         <div className="p-6 border-b border-white/10">
           <h2 className="text-lg font-semibold mb-4 flex items-center">
@@ -385,7 +385,7 @@ export default function RoutePlanner({
         </div>
 
         {/* Route Metrics */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-6 overflow-y-auto min-h-0">
           <h3 className="text-lg font-semibold mb-4 flex items-center">
             <Layers className="w-5 h-5 mr-2 text-purple-400" />
             Route Analysis

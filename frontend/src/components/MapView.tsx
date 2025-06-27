@@ -182,7 +182,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
         zoom={12}
         maxZoom={15}
         minZoom={9}
-        scrollWheelZoom={true}
+        scrollWheelZoom={false}
         preferCanvas={true}
         zoomControl={false}
       >
@@ -196,7 +196,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
         <MapEvents />
 
         {isFlightPlannerActive && (
-            <div className="absolute top-28 left-4 z-[1100] max-h-[calc(100%-7rem)] overflow-y-auto">
+            <div className="absolute top-28 left-4 z-[1100]">
               <RoutePlanner
               isFlightPlannerActive={isFlightPlannerActive} 
               onCloseFlightPlanner={onCloseFlightPlanner}
