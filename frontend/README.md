@@ -39,7 +39,7 @@ npm run build
 
 The application connects to the AWS API Gateway endpoint:
 ```
-https://i130uatty4.execute-api.eu-west-1.amazonaws.com/prod/spatial/bounding-box
+https://xyz.execute-api.region.amazonaws.com/prod/spatial/bounding-box
 ```
 
 Query parameters:

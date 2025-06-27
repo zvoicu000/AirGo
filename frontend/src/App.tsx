@@ -77,39 +77,43 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="App">
-      <header className="fixed top-0 left-0 right-0 z-[1000] bg-white/70 backdrop-blur-md shadow-md">
-        <div className="px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <a href="/">
-              <img src="/drone-icon.svg" alt="Drone Icon" className="w-12 h-12 text-blue-600" />
-            </a>
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+      {/* Header - Fixed position */}
+      <div className="fixed top-2 left-4 right-4 z-[1000] bg-black/30 backdrop-blur-xl border-r border-white/10 flex flex-col">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-1 bg-gradient-to-r from-blue-200 to-blue-300 rounded-xl">
+              <a href="/">
+                <img src="/drone-icon.svg" alt="Drone Icon" className="w-11 h-11" />
+              </a>
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Drone SoundAware</h1>
-              <p className="text-sm text-gray-600 italic">Route with Respect — Minimise Noise, Maximise Impact</p>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Drone SoundAware
+              </h1>
+              <p className="text-sm text-gray-400">Route with Respect — Minimise Noise, Maximise Impact</p>
             </div>
           </div>
-          <button
-            onClick={() => setIsFlightPlannerActive(!isFlightPlannerActive)}
-            className={`px-4 py-2 rounded font-medium ${
-              isFlightPlannerActive
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-            }`}
-          >
-            {isFlightPlannerActive ? 'Close Operations Planner' : 'Operations Planner'}
-          </button>
+          
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={() => setIsFlightPlannerActive(!isFlightPlannerActive)}
+              className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
+            >
+              {isFlightPlannerActive ? 'Close Operations Planner' : 'Open Operations Planner'}
+            </button>
+          </div>
         </div>
-      </header>
-      
-      <main className="h-screen">
+      </div>
+
+      <div className="flex h-full">
         <MapView 
           isFlightPlannerActive={isFlightPlannerActive} 
           onCloseFlightPlanner={() => setIsFlightPlannerActive(false)}
           optimisedRoute={optimisedRoute}
           apiBaseUrl={REST_API_URL}
         />
-      </main>
+      </div>
     </div>
   );
 };

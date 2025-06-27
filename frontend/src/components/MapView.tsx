@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, ZoomControl, Rectangle, Marker, Popup, useMapE
 import L from 'leaflet';
 import { ApiResponse, PopulationData, WeatherData, RouteResponse } from '../types';
 import WeatherPopup from './WeatherPopup';
-import FlightPlanner from './FlightPlanner';
+import RoutePlanner from './RoutePlanner';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -97,7 +97,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
       locateControl.onAdd = () => {
         const container = L.DomUtil.create('button', 'leaflet-bar leaflet-control leaflet-control-custom');
         container.innerHTML = `
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor"
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="black"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               viewBox="0 0 24 24" width="20" height="20">
             <circle cx="12" cy="12" r="10"/>
@@ -161,7 +161,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
   };
 
   return (
-    <div className="relative h-full w-full">
+    <div className="flex-1 relative">
       {error && (
         <div className="absolute top-4 left-4 z-[1000] bg-red-100 text-red-700 px-3 py-2 rounded shadow-lg">
           <p className="text-sm font-medium">{error}</p>
@@ -188,20 +188,23 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors | &copy; Ian Brumby <a href="https://crockwell.com" target="_blank">Crockwell Solutions</a> | Carnell, E. Tomlinson, S.J. Reis, S. (2025). <a href="https://www.data.gov.uk/dataset/076cef76-337c-4e5f-8123-ef660e53a836/uk-gridded-population-at-1-km-resolution-for-2021-based-on-census-2021-2022-and-land-cover-2021" target="_blank">UK Gridded Population Data</a>'
-          url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png"
+          url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png"
         />
 
         <ZoomControl position="bottomright" />
         <LocateControl />
-
         <MapEvents />
-        
-        <FlightPlanner 
-          isActive={isFlightPlannerActive} 
-          onClose={onCloseFlightPlanner}
-          apiBaseUrl={apiBaseUrl}
-          optimisedRoute={optimisedRoute}
-        />
+
+        {isFlightPlannerActive && (
+            <div className="absolute top-28 left-4 z-[1100] max-h-[calc(100%-7rem)] overflow-y-auto">
+              <RoutePlanner
+              isFlightPlannerActive={isFlightPlannerActive} 
+              onCloseFlightPlanner={onCloseFlightPlanner}
+              optimisedRoute={optimisedRoute}
+              apiBaseUrl={apiBaseUrl}
+              />
+            </div>
+        )}
 
         {mapData?.items.map((item, index) => {
           if (item.type === 'Population') {
