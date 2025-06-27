@@ -4,8 +4,9 @@
  * This includes Lambda functions, API Gateway and EventBridge.
  */
 
-import { CfnOutput, Stack, StackProps } from 'aws-cdk-lib';
+import { CfnOutput, Stack, StackProps, Aspects } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { EnvironmentConfig, Stage } from '@config';
 import { LambdaResources } from './nested/lambda-stack';
 import { ApiResources } from './nested/api-stack';
@@ -52,6 +53,51 @@ export class StatelessStack extends Stack {
       optimiseRoute: this.lambdaResources.optimiseRoute,
       getBoundingBox: this.lambdaResources.getBoundingBox,
     });
+
+    // cdk nag check and suppressions
+    Aspects.of(this).add(new AwsSolutionsChecks({ verbose: true }));
+    NagSuppressions.addStackSuppressions(
+      this,
+      [
+        {
+          id: 'AwsSolutions-IAM4',
+          reason: 'Use of managed policies is not required for this stack',
+        },
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Use of wildcard policies has been accepted for this stack',
+        },
+        {
+          id: 'AwsSolutions-L1',
+          reason: 'Lambda function is use the latest runtime and is not using deprecated features',
+        },
+        {
+          id: 'AwsSolutions-APIG1',
+          reason: 'API Gateway logging is not required for this proof-of-concept project',
+        },
+        {
+          id: 'AwsSolutions-APIG2',
+          reason: 'API Gateway is not using request validation for this proof-of-concept project',
+        },
+        {
+          id: 'AwsSolutions-APIG3',
+          reason: 'API Gateway WAF is not required for this proof-of-concept project',
+        },
+        {
+          id: 'AwsSolutions-APIG4',
+          reason: 'API Gateway is not using authorisation for this proof-of-concept project',
+        },
+        {
+          id: 'AwsSolutions-APIG6',
+          reason: 'API Gateway logging is not required for this proof-of-concept project',
+        },
+        {
+          id: 'AwsSolutions-COG4',
+          reason: 'API Gateway is not using Cognito for authentication in this proof-of-concept project',
+        },
+      ],
+      true,
+    );
 
     // Output the Events API details
     new CfnOutput(this, 'restApiUrl', { value: this.apiResources.api.url });

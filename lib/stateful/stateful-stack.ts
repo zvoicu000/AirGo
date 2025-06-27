@@ -4,8 +4,9 @@
  */
 
 import * as path from 'path';
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Stack, StackProps, Aspects } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { AwsSolutionsChecks, NagSuppressions } from 'cdk-nag';
 import { Table, AttributeType, StreamViewType } from 'aws-cdk-lib/aws-dynamodb';
 import { EnvironmentConfig, Stage, getRemovalPolicyFromStage } from '../../config';
 import { CustomTable } from '../constructs/custom-table';
@@ -58,5 +59,34 @@ export class StatefulStack extends Stack {
       },
       stream: StreamViewType.NEW_AND_OLD_IMAGES,
     }).table;
+
+    // cdk nag check and suppressions
+    Aspects.of(this).add(new AwsSolutionsChecks({ verbose: true }));
+    NagSuppressions.addStackSuppressions(
+      this,
+      [
+        {
+          id: 'AwsSolutions-S1',
+          reason: 'Server access logging is not required for this stack',
+        },
+        {
+          id: 'AwsSolutions-S10',
+          reason: 'Use of SSL is not required for this stack',
+        },
+        {
+          id: 'AwsSolutions-IAM4',
+          reason: 'Use of managed policies is not required for this stack',
+        },
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Use of wildcard policies has been accepted for this stack',
+        },
+        {
+          id: 'AwsSolutions-L1',
+          reason: 'Lambda function is use the latest runtime and is not using deprecated features',
+        },
+      ],
+      true,
+    );
   }
 }
