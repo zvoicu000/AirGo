@@ -76,15 +76,22 @@ const App: React.FC = () => {
     };
   }, []);
 
+  // Add this effect inside your App component
+  React.useEffect(() => {
+    if (!isFlightPlannerActive) {
+      setOptimisedRoute(null);
+    }
+  }, [isFlightPlannerActive]);
+
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
       {/* Header - Fixed position */}
       <div className="fixed top-2 left-4 right-4 z-[1000] bg-black/30 backdrop-blur-xl border-r border-white/10 flex flex-col">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center space-x-3">
-            <div className="p-1 bg-gradient-to-r from-blue-200 to-blue-300 rounded-xl">
+            <div className="p-1">
               <a href="/">
-                <img src="/drone-icon.svg" alt="Drone Icon" className="w-11 h-11" />
+                <img src="/drone-icon.png" alt="Drone Icon" className="w-11 h-11" />
               </a>
             </div>
             <div>

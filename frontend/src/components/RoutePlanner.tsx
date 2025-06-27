@@ -49,12 +49,18 @@ export default function RoutePlanner({
   optimisedRoute: receivedOptimisedRoute, 
   apiBaseUrl 
 }: PlannerProps) {
-  const [animatedValues, setAnimatedValues] = useState({
-    distance: 0,
-    population: 0,
-    noise: 0,
-    visibility: 0,
-    wind: 0
+  const [animatedValues, setAnimatedValues] = useState<{
+    distance?: number;
+    population?: number;
+    noise?: number;
+    visibility?: number;
+    wind?: number;
+  }>({
+    distance: undefined,
+    population: undefined,
+    noise: undefined,
+    visibility: undefined,
+    wind: undefined
   });
   const [startPosition, setStartPosition] = useState<[number, number] | null>(null);
   const [endPosition, setEndPosition] = useState<[number, number] | null>(null);
@@ -70,52 +76,52 @@ export default function RoutePlanner({
     { 
       key: 'distance', 
       label: 'Distance', 
-      value: animatedValues.distance ? animatedValues.distance.toFixed(1) : 'N/A', 
+      value: animatedValues.distance !== undefined ? animatedValues.distance.toFixed(1) : 'N/A', 
       unit: 'km', 
       icon: Route, 
       color: 'blue',
-      status: animatedValues.distance ? animatedValues.distance < 50 ? 'good' : animatedValues.distance < 100 ? 'moderate' : 'poor' : 'unknown',
-      width: animatedValues.distance ? `${animatedValues.distance}%` : '0%',
+      status: animatedValues.distance !== undefined ? animatedValues.distance < 50 ? 'good' : animatedValues.distance < 100 ? 'moderate' : 'poor' : 'unknown',
+      width: animatedValues.distance !== undefined ? `${animatedValues.distance}%` : '0%',
     },
     { 
       key: 'population', 
       label: 'Population Impact', 
-      value: animatedValues.population ? Math.floor(animatedValues.population) : 'N/A', 
+      value: animatedValues.population !== undefined ? Math.floor(animatedValues.population) : 'N/A', 
       unit: '', 
       icon: Users, 
       color: 'purple',
-      status: animatedValues.population ? animatedValues.population < 1000 ? 'good' : animatedValues.population < 3000 ? 'moderate' : 'poor' : 'unknown',
-      width: animatedValues.population ? `${animatedValues.population / 50}%` : '0%',
+      status: animatedValues.population !== undefined ? animatedValues.population < 1000 ? 'good' : animatedValues.population < 3000 ? 'moderate' : 'poor' : 'unknown',
+      width: animatedValues.population !== undefined ? `${animatedValues.population / 50}%` : '0%',
     },
     { 
       key: 'noise', 
       label: 'Noise Impact', 
-      value: animatedValues.noise ? animatedValues.noise.toFixed(1) : 'N/A', 
+      value: animatedValues.noise !== undefined ? animatedValues.noise.toFixed(1) : 'N/A', 
       unit: '', 
       icon: Volume2, 
       color: 'green',
-      status: animatedValues.noise ? animatedValues.noise < 0.5 ? 'excellent' : animatedValues.noise < 1 ? 'good' : animatedValues.noise < 3 ? 'moderate' : 'poor' : 'unknown',
-      width: animatedValues.noise ? `${animatedValues.noise * 20}%` : '0%',
+      status: animatedValues.noise !== undefined ? animatedValues.noise < 0.5 ? 'excellent' : animatedValues.noise < 1 ? 'good' : animatedValues.noise < 3 ? 'moderate' : 'poor' : 'unknown',
+      width: animatedValues.noise !== undefined ? `${animatedValues.noise * 20}%` : '0%',
     },
     { 
       key: 'visibility', 
       label: 'Visibility Risk', 
-      value: animatedValues.visibility ? animatedValues.visibility.toFixed(1) : 'N/A', 
+      value: animatedValues.visibility !== undefined ? animatedValues.visibility.toFixed(1) : 'N/A', 
       unit: '', 
       icon: Eye, 
       color: 'emerald',
-      status: animatedValues.visibility ? animatedValues.visibility < 0.5 ? 'excellent' : animatedValues.visibility < 1 ? 'good' : animatedValues.visibility < 3 ? 'moderate' : 'poor' : 'unknown',
-      width: animatedValues.visibility ? `${animatedValues.visibility * 20}%` : '0%',
+      status: animatedValues.visibility !== undefined ? animatedValues.visibility < 0.5 ? 'excellent' : animatedValues.visibility < 1 ? 'good' : animatedValues.visibility < 3 ? 'moderate' : 'poor' : 'unknown',
+      width: animatedValues.visibility !== undefined ? `${animatedValues.visibility * 20}%` : '0%',
     },
     { 
       key: 'wind', 
       label: 'Wind Risk', 
-      value: animatedValues.wind ? animatedValues.wind.toFixed(1) : 'N/A', 
+      value: animatedValues.wind !== undefined ? animatedValues.wind.toFixed(1) : 'N/A', 
       unit: '', 
       icon: Wind, 
       color: 'orange',
-      status: animatedValues.wind ? animatedValues.wind < 0.5 ? 'excellent' : animatedValues.wind < 1 ? 'good' : animatedValues.wind < 3 ? 'moderate' : 'poor' : 'unknown',
-      width: animatedValues.wind ? `${animatedValues.wind * 20}%` : '0%',
+      status: animatedValues.wind !== undefined ? animatedValues.wind < 0.5 ? 'excellent' : animatedValues.wind < 1 ? 'good' : animatedValues.wind < 3 ? 'moderate' : 'poor' : 'unknown',
+      width: animatedValues.wind !== undefined ? `${animatedValues.wind * 20}%` : '0%',
     }
   ];
 
@@ -149,19 +155,19 @@ export default function RoutePlanner({
   useEffect(() => {
     if (hoveredRoute === 'optimised' && optimisedRoute) {
       setAnimatedValues({
-        distance: optimisedRoute.routeDistance || 0,
-        population: optimisedRoute.populationImpact || 0,
-        noise: optimisedRoute.noiseImpactScore || 0,
-        visibility: optimisedRoute.visibilityRisk || 0,
-        wind: optimisedRoute.windRisk || 0
+        distance: optimisedRoute.routeDistance,
+        population: optimisedRoute.populationImpact,
+        noise: optimisedRoute.noiseImpactScore,
+        visibility: optimisedRoute.visibilityRisk,
+        wind: optimisedRoute.windRisk
       });
     } else if (hoveredRoute === 'original' && flightResult) {
       setAnimatedValues({
-        distance: flightResult.routeDistance || 0,
-        population: flightResult.populationImpact || 0,
-        noise: flightResult.noiseImpactScore || 0,
-        visibility: flightResult.visibilityRisk || 0,
-        wind: flightResult.windRisk || 0
+        distance: flightResult.routeDistance,
+        population: flightResult.populationImpact,
+        noise: flightResult.noiseImpactScore,
+        visibility: flightResult.visibilityRisk,
+        wind: flightResult.windRisk
       });
     }
   }, [hoveredRoute, optimisedRoute, flightResult]);
@@ -214,11 +220,11 @@ export default function RoutePlanner({
       const result = await response.json();
       setFlightResult(result);
       setAnimatedValues({
-        ...(result.routeDistance && { distance: parseFloat(result.routeDistance) }),
-        ...(result.populationImpact && { population: parseFloat(result.populationImpact) }),
-        ...(result.noiseImpactScore && { noise: parseFloat(result.noiseImpactScore) }),
-        ...(result.visibilityRisk && { visibility: parseFloat(result.visibilityRisk) }),
-        ...(result.windRisk && { wind: parseFloat(result.windRisk) })
+        ...(result.routeDistance !== undefined && { distance: parseFloat(result.routeDistance) }),
+        ...(result.populationImpact !== undefined && { population: parseFloat(result.populationImpact) }),
+        ...(result.noiseImpactScore !== undefined && { noise: parseFloat(result.noiseImpactScore) }),
+        ...(result.visibilityRisk !== undefined && { visibility: parseFloat(result.visibilityRisk) }),
+        ...(result.windRisk !== undefined && { wind: parseFloat(result.windRisk) })
       });
     } catch (error) {
       console.error('Error calculating flight:', error);
@@ -288,6 +294,7 @@ export default function RoutePlanner({
     setShowResult(false);
     setHoveredRoute(null);
     setIsOptimising(false);
+    setShowResult(false);
   };
 
   if (!isActive) return null;
@@ -419,20 +426,6 @@ export default function RoutePlanner({
               );
             })}
           </div>
-
-          {/* Status Indicator */}
-          {/* <div className="mt-6 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/20 rounded-xl">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-green-400">Route Status</span>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-sm text-green-400">Optimal</span>
-              </div>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              Showing original route metrics • Hover over routes to compare
-            </p>
-          </div> */}
         </div>
       </div>
 
