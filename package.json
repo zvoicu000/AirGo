@@ -37,6 +37,7 @@
     "@types/proj4": "^2.5.6",
     "@types/xml2js": "^0.4.14",
     "@typescript-eslint/parser": "^8.34.1",
+    "aws-sdk-client-mock": "^4.1.0",
     "axios": "^1.10.0",
     "esbuild": "^0.25.5",
     "eslint": "^9.29.0",

@@ -35,7 +35,10 @@ export default defineConfig([
     ignores: [
       'package-lock.json',
       '**/cdk.out',
+      '**/cdk.out.frontend',
       '**/node_modules/**/*',
+      'frontend',
+      'dist',
     ],
   },
   tseslint.configs.recommended,
