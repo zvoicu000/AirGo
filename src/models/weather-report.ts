@@ -1,5 +1,11 @@
-/**
- * Weather Object
+/*
+ * Weather Class Object
+ *
+ * This class is used to represent a weather report object.
+ * It is initialized with a METAR report and provides methods to validate the data,
+ * extract relevant information, and convert it to a format suitable for DynamoDB.
+ *
+ * This software is licensed under the GNU General Public License v3.0.
  */
 
 import * as geohash from 'ngeohash';
@@ -158,9 +164,11 @@ export class WeatherReport {
         if (isNumeric(metar['wind_speed_kt'][0])) this.windSpeed = metar['wind_speed_kt'][0] * 0.5144;
       if (metar['visibility_statute_mi'])
         if (isNumeric(metar['visibility_statute_mi'][0])) {
-          this.visibility = metar['visibility_statute_mi'][0] * 1609.34;
+          this.visibility = Math.min(metar['visibility_statute_mi'][0] * 1609.34, 10000);
+        } else if (metar['visibility_statute_mi'][0].startsWith('6+')) {
+          this.visibility = 10000;
         } else if (metar['visibility_statute_mi'][0].startsWith('10')) {
-          this.visibility = 200000;
+          this.visibility = 10000;
         }
 
       // Set the weather interpreted data from the weather string in the metar

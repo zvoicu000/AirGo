@@ -86,9 +86,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       route: [startPoint, endPoint],
       routeDistance: routeDistance,
       populationImpact: populationImpact,
-      ...(noiseImpact && { noiseImpactScore: noiseImpact }),
-      ...(visibilityRisk && { visibilityRisk: visibilityRisk }),
-      ...(windRisk && { windRisk: windRisk }),
+      ...(noiseImpact !== undefined && { noiseImpactScore: noiseImpact }),
+      ...(visibilityRisk !== undefined && { visibilityRisk: visibilityRisk }),
+      ...(windRisk !== undefined && { windRisk: windRisk }),
     }),
     ...RETURN_HEADERS,
   };

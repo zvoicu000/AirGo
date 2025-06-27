@@ -1,4 +1,14 @@
+/*
+ * Route Engine Module
+ *
+ * This module is responsible for processing and optimizing drone delivery routes.
+ * It utilizes geospatial data and algorithms to find the most efficient paths,
+ * taking into account various constraints and environmental factors.
+ *
+ * This software is licensed under the GNU General Public License v3.0.
+ */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import * as geohash from 'ngeohash';
 import { logger, chunkArray } from '../shared';
 import { DynamoDBDocumentClient, QueryCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
@@ -350,14 +360,21 @@ export async function assessWeatherImpact(
   const weatherPoints = geoPoints.filter((p) => p.type === 'Weather');
   if (weatherPoints.length > 0) {
     for (const point of weatherPoints) {
-      // Visibility risk is calculated up to 5 when the visibility is less than 1,000 meters
-      const visibilityRiskValue = point.visibility < 1000 ? (1000 - point.visibility) / 200 : 0;
-      visibilityRisk = visibilityRisk ? Math.max(visibilityRisk, visibilityRiskValue) : visibilityRiskValue;
-      if (visibilityRiskValue > visibilityRisk) visibilityRisk = visibilityRiskValue;
-      // Wind risk is calculated up to 5 when the wind speed is greater than 20 m/s
-      const windRiskValue = point.windSpeed ? (point.windSpeed > 20 ? 5 : point.windSpeed / 4) : 0;
-      windRisk = windRisk ? Math.max(windRisk, windRiskValue) : windRiskValue;
-      if (windRiskValue > windRisk) windRisk = windRiskValue;
+      // Visibility risk is calculated up to 5 when the visibility is less than 1,000 meters, risk is 0 when the visibility is 10,000 meters or more
+      if (point.visibility) {
+        const visibilityRiskValue =
+          point.visibility <= 1000
+            ? 5
+            : point.visibility >= 10000
+              ? 0
+              : +(5 - ((point.visibility - 1000) * 5) / 9000).toFixed(1);
+        visibilityRisk = visibilityRisk ? Math.max(visibilityRisk, visibilityRiskValue) : visibilityRiskValue;
+      }
+      // Wind risk is calculated up to 5 when the wind speed is greater than 10 m/s
+      if (point.windSpeed) {
+        const windRiskValue = point.windSpeed ? (point.windSpeed > 10 ? 5 : point.windSpeed / 2) : 0;
+        windRisk = windRisk ? Math.max(windRisk, windRiskValue) : windRiskValue;
+      }
     }
   }
   visibilityRisk = visibilityRisk && Number(visibilityRisk.toFixed(1));

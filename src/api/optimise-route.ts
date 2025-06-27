@@ -9,28 +9,13 @@
  * This software is licensed under the GNU General Public License v3.0.
  */
 
-import {
-  logger,
-  Point,
-  getRouteGeoHashes,
-  getPointsNearRoute,
-  fetchGeoHashItemsFromDynamoDB,
-  RETURN_HEADERS,
-  findOptimisedRoute,
-  getRouteDistance,
-  assessPopulationImpact,
-  assessNoiseImpact,
-  assessWeatherImpact,
-  createRouteRecord,
-} from '../shared';
+import { logger, Point, RETURN_HEADERS, createRouteRecord } from '../shared';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 const client = new DynamoDBClient({});
 const ddb = DynamoDBDocumentClient.from(client);
-
-const PARTITION_KEY_HASH_PRECISION = parseFloat(process.env.PARTITION_KEY_HASH_PRECISION || '5');
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   logger.info('Processing Drone Operation Route Optimisation', { event });
@@ -68,42 +53,4 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }),
     ...RETURN_HEADERS,
   };
-
-  // // Step 1: Get all GeoHash prefixes covering the route
-  // const hashPrefixes = getRouteGeoHashes(startPoint, endPoint, PARTITION_KEY_HASH_PRECISION);
-  // logger.info('Geohash Prefixes intercepting the route', { count: hashPrefixes.length });
-
-  // // Step 2: Query DynamoDB for items in the geohashes
-  // const results = await fetchGeoHashItemsFromDynamoDB(ddb, hashPrefixes);
-  // logger.info('Queried Results from GeoHashes', { count: results.length });
-
-  // // Step 3: Find optimised route
-  // const optimisedRoute = await findOptimisedRoute(startPoint, endPoint, results);
-
-  // // Step 4: Evaluate the optimised route
-  // const routeDistance = await getRouteDistance(optimisedRoute);
-  // const routePointsOfInterest = getPointsNearRoute(optimisedRoute, results);
-  // const populationImpact = await assessPopulationImpact(routePointsOfInterest);
-  // const noiseImpact = await assessNoiseImpact(populationImpact);
-  // const { visibilityRisk, windRisk } = await assessWeatherImpact(routePointsOfInterest);
-
-  // logger.info('Route Evaluation Complete', {
-  //   routeDistance: routeDistance,
-  //   populationImpact: populationImpact,
-  //   noiseImpactScore: noiseImpact,
-  //   visibilityRisk: visibilityRisk,
-  //   windRisk: windRisk,
-  // });
-
-  // return {
-  //   body: JSON.stringify({
-  //     route: optimisedRoute,
-  //     routeDistance: routeDistance,
-  //     populationImpact: populationImpact,
-  //     ...(noiseImpact && { noiseImpactScore: noiseImpact }),
-  //     ...(visibilityRisk && { visibilityRisk: visibilityRisk }),
-  //     ...(windRisk && { windRisk: windRisk }),
-  //   }),
-  //   ...RETURN_HEADERS,
-  // };
 };
