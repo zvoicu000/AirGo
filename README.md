@@ -37,7 +37,7 @@ A live demo of the deployed application is available at [Drone Delivery Service 
 
 The Drone Delivery Service is a full-stack application that helps plan and optimize drone delivery routes by providing critical data visualization and analysis tools. It combines population density data with real-time weather information to assist in drone delivery planning.
 
-> The application uses a global weather dataset, but for demonstration purposes, the population data is limited to the UK. This allows the application to deploy in a reasonable timeframe as the population data is loaded on deploy.
+**The application uses a global weather dataset, but for demonstration purposes, the population data is limited to the UK. This allows the application to deploy in a reasonable timeframe as the population data is loaded on deploy.**
 
 ## 🏗 Architecture
 
@@ -51,10 +51,9 @@ The overall architecture is shown below:
 
 AWS services consist of:
 - AWS Lambda for serverless compute
-- Amazon DynamoDB for data storage
+- Amazon DynamoDB for data storage and event-driven architecture
 - Amazon S3 for static hosting
 - Amazon CloudFront for content delivery
-- AWS CodePipeline for CI/CD
 - AWS API Gateway for REST API management
 - AWS AppSync Events for real-time websocket communication
 
