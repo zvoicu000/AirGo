@@ -1,19 +1,24 @@
 # Drone Delivery Service
 
-A comprehensive platform for planning and managing drone deliveries, featuring an interactive map interface with population density data and real-time weather information.
+Developed for the [AWS Lambda Hackathon 2025](https://awslambdahackathon.devpost.com), this project is a full-stack drone delivery service application that integrates population density data and real-time weather information to optimize drone delivery routes.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+AWS Lambda is at the core of this application, providing the compute services needed for real-time data processing and API management.
+
+![Application Screenshot](resources/images/application.png)
+
+A live demo of the deployed application is available at [Drone Delivery Service Demo](https://droneplanner.crockwell.com).
+
+[![License: GPL 3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](https://opensource.org/licenses/GPL-3.0)
 
 ## 📋 Table of Contents
 
 - [Drone Delivery Service](#drone-delivery-service)
   - [📋 Table of Contents](#-table-of-contents)
   - [🎯 Overview](#-overview)
-  - [✨ Features](#-features)
   - [🏗 Architecture](#-architecture)
-    - [Key AWS Services Used](#key-aws-services-used)
-  - [🔧 Prerequisites](#-prerequisites)
-  - [🚀 Getting Started](#-getting-started)
+  - [ƛ Use of AWS Lambda](#ƛ-use-of-aws-lambda)
+  - [🔧 System Prerequisites](#-system-prerequisites)
+  - [🚀 The TLDR Getting Started](#-the-tldr-getting-started)
   - [📁 Project Structure](#-project-structure)
   - [💻 Frontend Application](#-frontend-application)
   - [🛠 Development](#-development)
@@ -22,31 +27,11 @@ A comprehensive platform for planning and managing drone deliveries, featuring a
   - [🚢 Deployment](#-deployment)
   - [🌐 API Documentation](#-api-documentation)
   - [📊 Data Sources](#-data-sources)
-  - [🤝 Contributing](#-contributing)
   - [📄 License](#-license)
 
 ## 🎯 Overview
 
 The Drone Delivery Service is a full-stack application that helps plan and optimize drone delivery routes by providing critical data visualization and analysis tools. It combines population density data with real-time weather information to assist in drone delivery planning.
-
-## ✨ Features
-
-- **Interactive Map Interface**
-  - OpenStreetMap integration with pan and zoom capabilities
-  - Population density visualization (500m x 500m grid)
-  - Real-time weather station data
-  - Dynamic data loading based on viewport
-
-- **Backend Services**
-  - Serverless architecture using AWS Lambda
-  - Efficient spatial data querying
-  - Real-time weather data integration
-  - Scalable data storage using DynamoDB
-
-- **Infrastructure**
-  - Fully automated CI/CD pipelines
-  - Separate stateful and stateless resource management
-  - Multi-environment support (Dev, Staging, Production)
 
 ## 🏗 Architecture
 
@@ -56,23 +41,37 @@ The platform consists of three main components:
 - **Backend**: Serverless API built with AWS Lambda and API Gateway
 - **Infrastructure**: AWS CDK-based deployment with separate stateful and stateless stacks
 
-### Key AWS Services Used
+The overall architecture is shown below:
+![Architecture Diagram](resources/images/architecture.png)
+
+AWS services consist of:
 - AWS Lambda for serverless compute
 - Amazon DynamoDB for data storage
 - Amazon S3 for static hosting
 - Amazon CloudFront for content delivery
 - AWS CodePipeline for CI/CD
 - AWS API Gateway for REST API management
+- AWS AppSync Events for real-time websocket communication
 
-## 🔧 Prerequisites
+## ƛ Use of AWS Lambda
 
-- Node.js (v16 or higher)
+AWS Lambda sits at the heart of the application. Lambda functions are used for three main purposes with three different trigger types:
+
+1. **Scheduled Data Loading**: A Lambda function processes data from weather stations and stores it in DynamoDB. This is triggered by an Eventbridge Scheduled Event, running every hour to bring in the latest weather data.
+2. **API Management**: Lambda functions handle API requests, providing endpoints for the frontend to fetch data and perform operations.
+3. **Event Driven**: A Lambda function is triggered by INSERTS into a DynamoDB table, allowing for real-time updates to the frontend when new data is added, making use of AWS AppSync Events for websocket communication.
+
+## 🔧 System Prerequisites
+
+Before you begin, ensure you have the following prerequisites installed and configured on your local machine:
+- Node.js
 - npm (latest stable version)
-- AWS CLI configured with appropriate credentials
+- AWS CLI configured with appropriate credentials, connected to a valid AWS account
 - AWS CDK CLI (`npm install -g aws-cdk`)
+- A bootstrapped AWS environment in the desired region (e.g., `eu-west-1`): `cdk bootstrap --region eu-west-1`
 - AWS SAM CLI (for local development)
 
-## 🚀 Getting Started
+## 🚀 The TLDR Getting Started
 
 1. **Clone the repository**
    ```bash
@@ -85,37 +84,33 @@ The platform consists of three main components:
    npm install
    ```
 
-3. **Configure AWS environment**
-   ```bash
-   # Bootstrap AWS CDK (if not already done)
-   cdk bootstrap --region eu-west-1
-   ```
-
-4. **Deploy the application**
+3. **Deploy the application (Frontend and Backend)**
    ```bash
    npm run deploy
    ```
 
-   > Note: Initial deployment includes data seeding and may take several minutes.
+   > Note: Initial deployment includes data seeding and may take several minutes. This is a one-time setup step.
+   > Note: running npm run deploy will deploy the backend and the frontend of the application. These are technically two different CDK applications. More details of the deployment process can be found in the [Deployment](#-deployment) section.
 
 ## 📁 Project Structure
 
 ```bash
 .
-├── bin/                    # CDK app entry points
-├── config/                 # Environment configurations
+├── bin/                   # CDK app entry points (backend and frontend)
+├── config/                # Environment configurations
 ├── frontend/              # React frontend application
 ├── lib/                   # CDK infrastructure code
 │   ├── constructs/        # Reusable CDK constructs
-│   ├── stateful/         # Stateful resource stacks
-│   └── stateless/        # Stateless resource stacks
+│   ├── stateful/          # Stateful resource stacks (DynamoDB)
+│   └── stateless/         # Stateless resource stacks (Lambda, API Gateway) - Uses nested stacks
+│   └── frontend/          # Frontend resource stacks (S3 and CloudFront)
 ├── src/                   # Lambda function source code
 └── test/                  # Test files
 ```
 
 ## 💻 Frontend Application
 
-The frontend is a React application with the following features:
+The frontend application is built using React and Tailwind CSS, providing a responsive and interactive user interface for visualizing population density and weather data. This has been built for the purposes of exercising the system backend and is not intended for production use. It has the following features:
 
 - Population density visualization
 - Weather station data display
@@ -129,7 +124,7 @@ npm install
 npm start
 ```
 
-Configure the API endpoint in `frontend/public/config.js` (see `config.example.js` for reference).
+The frontend running locally will connect to the deployed backend API, which is configured with an output of the backend CDK deployment and written to the `frontend/src/cdk-output.json` file.
 
 ## 🛠 Development
 
@@ -140,23 +135,13 @@ Configure the API endpoint in `frontend/public/config.js` (see `config.example.j
 
 ### Testing
 ```bash
-npm test        # Run unit tests
+npm run test    # Run unit tests
 npm run lint    # Run linting
 ```
 
 ## 🚢 Deployment
 
-The project uses AWS CodePipeline for automated deployments:
-
-- `prod` branch → Production environment
-- `stg` branch → Staging environment
-- `dev` branch → Development environment
-
-Manual deployment commands:
-```bash
-cdk deploy --all               # Deploy all stacks
-cdk deploy PipelineStack-Prod  # Deploy specific stack
-```
+The project uses the awesome CDK project (in Typescript) for infrastructure definition and deployment.
 
 ## 🌐 API Documentation
 
@@ -179,14 +164,6 @@ Key endpoints:
 - Coverage: ~800,000 data points across the UK
 - License: Commercial and non-commercial use permitted
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
-
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GNU General Public License v3.0 [![License: GPL 3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg)](https://opensource.org/licenses/GPL-3.0) - see the LICENSE file for details.
