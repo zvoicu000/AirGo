@@ -21,11 +21,13 @@ A live demo of the deployed application is available at [Drone Delivery Service 
   - [🚀 The TLDR Getting Started](#-the-tldr-getting-started)
   - [📁 Project Structure](#-project-structure)
   - [💻 Frontend Application](#-frontend-application)
-  - [🛠 Development](#-development)
-    - [Local Development](#local-development)
+  - [🛠 Backend Application](#-backend-application)
+    - [Local Development and Debugging](#local-development-and-debugging)
     - [Testing](#testing)
   - [🚢 Deployment](#-deployment)
-  - [🌐 API Documentation](#-api-documentation)
+  - [🌐 Backend REST API](#-backend-rest-api)
+  - [💰 Costs](#-costs)
+  - [🗑️ Cleanup](#️-cleanup)
   - [📊 Data Sources](#-data-sources)
   - [📄 License](#-license)
 
@@ -98,24 +100,25 @@ Before you begin, ensure you have the following prerequisites installed and conf
 .
 ├── bin/                   # CDK app entry points (backend and frontend)
 ├── config/                # Environment configurations
-├── frontend/              # React frontend application
+├── frontend/              # React frontend application. Used to demonstrate the backend API
 ├── lib/                   # CDK infrastructure code
 │   ├── constructs/        # Reusable CDK constructs
 │   ├── stateful/          # Stateful resource stacks (DynamoDB)
 │   └── stateless/         # Stateless resource stacks (Lambda, API Gateway) - Uses nested stacks
 │   └── frontend/          # Frontend resource stacks (S3 and CloudFront)
 ├── src/                   # Lambda function source code
-└── test/                  # Test files
+└── test/                  # Test files and test payloads for locally invoking Lambda functions
 ```
 
 ## 💻 Frontend Application
 
-The frontend application is built using React and Tailwind CSS, providing a responsive and interactive user interface for visualizing population density and weather data. This has been built for the purposes of exercising the system backend and is not intended for production use. It has the following features:
+The frontend application is built using React and Tailwind CSS, providing a interactive user interface for visualizing population density and weather data. This has been built for the purposes of demonstrating the system backend and is not intended for production use. It has the following features:
 
 - Population density visualization
 - Weather station data display
 - Interactive map controls
-- Responsive design using Tailwind CSS
+- Route planning for drone deliveries
+- Route optimization based on population density and weather conditions
 
 To run locally:
 ```bash
@@ -126,12 +129,19 @@ npm start
 
 The frontend running locally will connect to the deployed backend API, which is configured with an output of the backend CDK deployment and written to the `frontend/src/cdk-output.json` file.
 
-## 🛠 Development
+## 🛠 Backend Application
 
-### Local Development
+### Local Development and Debugging
+
+It is possible to run and debug the backend Lambda functions locally using the AWS SAM CLI. This allows you to test Lambda functions and API Gateway endpoints without deploying to AWS.
+
+For VSCode users, the launch configurations are provided in `.vscode/launch.json`. This allows you to run and debug Lambda functions locally with breakpoints and logging.
+
 1. Install AWS SAM CLI
-2. Use VSCode debugging configurations in `.vscode/launch.json`
-3. Run Lambda functions locally for testing
+2. Ensure the backend is deployed at least once to create the necessary resources (see [Deployment](#-deployment) section)
+3. Create a `local.env.json` file in the root of the project, based on the parameters in the `local.env.example.json` file. This file should contain the environment variables required for local development, such as API keys and DynamoDB table names.
+4. Use VSCode debugging configurations in `.vscode/launch.json`
+5. Run Lambda functions locally for testing
 
 ### Testing
 ```bash
@@ -143,12 +153,20 @@ npm run lint    # Run linting
 
 The project uses the awesome CDK project (in Typescript) for infrastructure definition and deployment.
 
-## 🌐 API Documentation
+The deployment is split into two CDK projects:
+- **Backend**: Contains the stateless and stateful stacks. The command `npm run deploy:backend` will deploy the backend CDK stacks. Following completion of the backend deployment, it will output the necessary API Gateway endpoint URLs to the `cdk-output.json` file in the `frontend/src` directory. This file is used by the frontend application to connect to the backend API.
+- **Frontend**: Contains the static hosting stack. The command `npm run deploy:frontend` will build the frontend React application and deploy the frontend application to an S3 bucket and configure CloudFront for content delivery.
+
+To deploy the entire application, you can run `npm run deploy` which will run both the backend and frontend deployments sequentially.
+
+## 🌐 Backend REST API
 
 The backend API is available at:
 ```bash
 https://[api-id].execute-api.[region].amazonaws.com/prod/
 ```
+
+It is secured with an API key, which is generated during the deployment process. The API key is required for all requests to the backend.
 
 Key endpoints:
 - `/spatial/bounding-box` - Get population data within map bounds
@@ -158,11 +176,45 @@ Key endpoints:
   - `latMax`: Maximum latitude
   - `lonMax`: Maximum longitude
 
+- `/routes/assess-route` - Assess a drone delivery route
+- Parameters:
+  - `latStart`: Starting latitude
+  - `lonStart`: Starting longitude
+  - `latEnd`: Ending latitude
+  - `lonEnd`: Ending longitude
+
+- `/routes/optimise-route` - Optimize a drone delivery route. This is an asynchronous operation that returns a job ID. The results are processed and an AppSync Event is triggered when the job is complete.
+- Body:
+  ```json
+  {
+    "startPoint": {
+      "lat": <starting latitude>,
+      "lon": <starting longitude>
+    },
+    "endPoint": {
+      "lat": <ending latitude>,
+      "lon": <ending longitude>
+    },
+  }
+  ```
+
+## 💰 Costs
+
+The application is full serverless and uses various AW serverless services, which may incur costs based on usage. The main ongoing cost driver is the loading of Weather Station data, which is scheduled to run every hour. This consumes approximately 3.6 million Write Capacity Units (RCUs) per month, which is approximately $2.50 per month at the time of writing. Total costs including Lambda and Cloudwatch should not exceed $5 per month for low usage. For ongoing use, provisioned mode should be considered for the DynamoDB table to reduce costs.
+
+## 🗑️ Cleanup
+
+To clean up the deployed resources, run:
+```bash
+npm run destroy
+```
+
 ## 📊 Data Sources
 
 - Population data: UK Centre for Ecology & Hydrology
 - Coverage: ~800,000 data points across the UK
 - License: Commercial and non-commercial use permitted
+
 
 ## 📄 License
 
