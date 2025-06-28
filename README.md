@@ -29,19 +29,22 @@ A live demo of the deployed application is available at [Drone Delivery Service 
   - [💰 Costs](#-costs)
   - [🗑️ Cleanup](#️-cleanup)
   - [📊 Data Sources](#-data-sources)
+    - [Population data](#population-data)
+    - [Weather data](#weather-data)
   - [📄 License](#-license)
 
 ## 🎯 Overview
 
 The Drone Delivery Service is a full-stack application that helps plan and optimize drone delivery routes by providing critical data visualization and analysis tools. It combines population density data with real-time weather information to assist in drone delivery planning.
 
+> The application uses a global weather dataset, but for demonstration purposes, the population data is limited to the UK. This allows the application to deploy in a reasonable timeframe as the population data is loaded on deploy.
+
 ## 🏗 Architecture
 
 The platform consists of three main components:
 
-- **Frontend**: React-based web application served via CloudFront
-- **Backend**: Serverless API built with AWS Lambda and API Gateway
-- **Infrastructure**: AWS CDK-based deployment with separate stateful and stateless stacks
+- **Frontend**: React-based web application served via CloudFront. Deployed with AWS CDK.
+- **Backend**: Serverless API built with AWS Lambda and API Gateway, using DynamoDB for data storage and event driven architecture for real-time updates. Deployed with AWS CDK.
 
 The overall architecture is shown below:
 ![Architecture Diagram](resources/images/architecture.png)
@@ -91,8 +94,11 @@ Before you begin, ensure you have the following prerequisites installed and conf
    npm run deploy
    ```
 
-   > Note: Initial deployment includes data seeding and may take several minutes. This is a one-time setup step.
-   > Note: running npm run deploy will deploy the backend and the frontend of the application. These are technically two different CDK applications. More details of the deployment process can be found in the [Deployment](#-deployment) section.
+> Note: Initial deployment includes data seeding and may take several minutes. This is a one-time setup step.
+
+> Note: running npm run deploy will deploy the backend and the frontend of the application. These are technically two different CDK applications. More details of the deployment process can be found in the [Deployment](#-deployment) section.
+
+Following deployment, the frontend application will be available at the CloudFront URL outputted in the terminal. The backend API will also be available, and the frontend will automatically connect to it.
 
 ## 📁 Project Structure
 
@@ -161,7 +167,7 @@ To deploy the entire application, you can run `npm run deploy` which will run bo
 
 ## 🌐 Backend REST API
 
-The backend API is available at:
+Following deployment, the backend API will available at:
 ```bash
 https://[api-id].execute-api.[region].amazonaws.com/prod/
 ```
@@ -188,19 +194,19 @@ Key endpoints:
   ```json
   {
     "startPoint": {
-      "lat": <starting latitude>,
-      "lon": <starting longitude>
+      "lat": 0.0,
+      "lon": 0.0
     },
     "endPoint": {
-      "lat": <ending latitude>,
-      "lon": <ending longitude>
+      "lat": 0.0,
+      "lon": 0.0
     },
   }
   ```
 
 ## 💰 Costs
 
-The application is full serverless and uses various AW serverless services, which may incur costs based on usage. The main ongoing cost driver is the loading of Weather Station data, which is scheduled to run every hour. This consumes approximately 3.6 million Write Capacity Units (RCUs) per month, which is approximately $2.50 per month at the time of writing. Total costs including Lambda and Cloudwatch should not exceed $5 per month for low usage. For ongoing use, provisioned mode should be considered for the DynamoDB table to reduce costs.
+The application is full serverless and uses various AWS serverless services, which may incur costs based on usage. The main ongoing cost driver is the loading of Weather Station data, which is scheduled to run every hour. This consumes approximately 3.6 million Write Capacity Units (RCUs) per month, which is approximately $2.50 per month at the time of writing. Total costs including Lambda and Cloudwatch should not exceed $5 per month for low usage. For ongoing use, provisioned mode should be considered for the DynamoDB table to reduce costs.
 
 ## 🗑️ Cleanup
 
@@ -211,10 +217,17 @@ npm run destroy
 
 ## 📊 Data Sources
 
-- Population data: UK Centre for Ecology & Hydrology
-- Coverage: ~800,000 data points across the UK
-- License: Commercial and non-commercial use permitted
+### Population data
 
+The population density data is provided by the UK Government through the UK open data source initiative [(data.gov.uk)](https://data.gov.uk)
+- Coverage: ~800,000 data points across the UK at 1km resolution
+- License: Commercial and non-commercial use permitted
+- Reference: Carnell, E., Tomlinson, S.J., Reis, S. (2025). UK gridded population at 1 km resolution for 2021 based on Census 2021/2022 and Land Cover Map 2021. NERC EDS Environmental Information Data Centre https://doi.org/10.5285/7beefde9-c520-4ddf-897a-0167e8918595
+
+### Weather data
+Weather data is sourced from National Oceanic and Atmospheric Administration (NOAA) and covers a global dataset of Weather Data from Airfields (METARs).
+- Coverage: Global
+- License: Commercial and non-commercial use permitted
 
 ## 📄 License
 
