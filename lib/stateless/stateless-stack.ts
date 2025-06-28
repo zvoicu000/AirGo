@@ -89,7 +89,11 @@ export class StatelessStack extends Stack {
         },
         {
           id: 'AwsSolutions-APIG4',
-          reason: 'API Gateway is not using authorisation for this proof-of-concept project',
+          reason: 'API Gateway is not using full authorisation for this proof-of-concept project',
+        },
+        {
+          id: 'AwsSolutions-SMG4',
+          reason: 'API Gateway API Key does not need to be rotated for this proof-of-concept project',
         },
         {
           id: 'AwsSolutions-APIG6',
@@ -105,6 +109,7 @@ export class StatelessStack extends Stack {
 
     // Output the Events API details
     new CfnOutput(this, 'restApiUrl', { value: this.apiResources.api.url });
+    new CfnOutput(this, 'restApiKey', { value: this.apiResources.apiKeyValue });
     new CfnOutput(this, 'eventsApiKey', { value: this.eventResources.eventsApi.apiKeys['Default'].attrApiKey });
     new CfnOutput(this, 'eventsHttpDomain', { value: this.eventResources.eventsApi.httpDns });
     new CfnOutput(this, 'eventsRealtimeDomain', { value: this.eventResources.eventsApi.realtimeDns });

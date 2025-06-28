@@ -6,6 +6,7 @@ import output from './cdk-output.json'
 
 // use the output from the CDK stack deployment
 const REST_API_URL = output.StatelessStack.restApiUrl;
+const REST_API_KEY = output.StatelessStack.restApiKey;
 const EVENTS_HTTP_DOMAIN = output.StatelessStack.eventsHttpDomain;
 const EVENTS_REALTIME_DOMAIN = output.StatelessStack.eventsRealtimeDomain;
 const EVENTS_API_KEY = output.StatelessStack.eventsApiKey;
@@ -119,6 +120,7 @@ const App: React.FC = () => {
           onCloseFlightPlanner={() => setIsFlightPlannerActive(false)}
           optimisedRoute={optimisedRoute}
           apiBaseUrl={REST_API_URL}
+          apiKey={REST_API_KEY}
         />
       </div>
     </div>

@@ -24,6 +24,7 @@ interface PlannerProps {
   onCloseFlightPlanner: () => void;
   optimisedRoute: RouteResponse | null;
   apiBaseUrl: string;
+  apiKey: string;
 }
 
 interface FlightResult extends RouteResponse {}
@@ -47,7 +48,8 @@ export default function RoutePlanner({
   isFlightPlannerActive: isActive, 
   onCloseFlightPlanner, 
   optimisedRoute: receivedOptimisedRoute, 
-  apiBaseUrl 
+  apiBaseUrl,
+  apiKey
 }: PlannerProps) {
   const [animatedValues, setAnimatedValues] = useState<{
     distance?: number;
@@ -214,7 +216,13 @@ export default function RoutePlanner({
     setIsCalculating(true);
     try {
       const url = `${apiBaseUrl}/routes/assess-route?latStart=${startPosition[0]}&lonStart=${startPosition[1]}&latEnd=${endPosition[0]}&lonEnd=${endPosition[1]}`;
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': apiKey,
+        },
+        method: 'GET',
+      });
       if (!response.ok) throw new Error('Failed to calculate flight');
       
       const result = await response.json();
@@ -243,6 +251,7 @@ export default function RoutePlanner({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-API-KEY': apiKey,
         },
         body: JSON.stringify({
           startPoint: {

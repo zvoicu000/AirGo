@@ -26,9 +26,10 @@ interface MapViewProps {
   onCloseFlightPlanner: () => void;
   optimisedRoute: RouteResponse | null;
   apiBaseUrl: string;
+  apiKey: string;
 }
 
-const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightPlanner, optimisedRoute, apiBaseUrl }) => {
+const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightPlanner, optimisedRoute, apiBaseUrl, apiKey }) => {
   const [mapData, setMapData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +52,13 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
       const northEast = bounds.getNorthEast();
       const url = `${apiBaseUrl}/spatial/bounding-box?latMin=${southWest.lat}&lonMin=${southWest.lng}&latMax=${northEast.lat}&lonMax=${northEast.lng}`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': apiKey,
+        },
+        method: 'GET',
+      });
 
       if (!response.ok) {
         throw new Error(`API responded with status ${response.status}`);
@@ -202,6 +209,7 @@ const MapView: React.FC<MapViewProps> = ({ isFlightPlannerActive, onCloseFlightP
               onCloseFlightPlanner={onCloseFlightPlanner}
               optimisedRoute={optimisedRoute}
               apiBaseUrl={apiBaseUrl}
+              apiKey={apiKey}
               />
             </div>
         )}

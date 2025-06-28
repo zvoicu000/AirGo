@@ -23,6 +23,7 @@ export interface EnvironmentConfig {
   logLevel: string;
   minifyCodeOnDeployment?: boolean;
   apiUrlParameterName?: string;
+  apiKeyParameterName?: string;
   spatialDataTableName?: string;
   routesTableName?: string;
   partitionKeyHashPrecision?: number;
@@ -48,6 +49,7 @@ const defaultConfig: EnvironmentConfig = {
   logLevel: 'INFO',
   minifyCodeOnDeployment: false,
   apiUrlParameterName: '/droneServiceApi/apiUrl',
+  apiKeyParameterName: '/droneServiceApi/apiKey',
   spatialDataTableName: 'SpatialDataTable',
   routesTableName: 'RoutesTable',
   partitionKeyHashPrecision: 5, // Approx 5km resolution for partitioning
