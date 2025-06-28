@@ -221,7 +221,7 @@ npm run destroy
 The population density data is provided by the UK Government through the UK open data source initiative [(data.gov.uk)](https://data.gov.uk)
 - Coverage: ~800,000 data points across the UK at 1km resolution
 - License: Commercial and non-commercial use permitted
-- Reference: Carnell, E., Tomlinson, S.J., Reis, S. (2025). UK gridded population at 1 km resolution for 2021 based on Census 2021/2022 and Land Cover Map 2021. NERC EDS Environmental Information Data Centre https://doi.org/10.5285/7beefde9-c520-4ddf-897a-0167e8918595
+- Citation: Carnell, E.; Tomlinson, S.J.; Reis, S. (2025). UK gridded population at 1 km resolution for 2021 based on Census 2021/2022 and Land Cover Map 2021. NERC EDS Environmental Information Data Centre. https://doi.org/10.5285/7beefde9-c520-4ddf-897a-0167e8918595
 
 ### Weather data
 Weather data is sourced from National Oceanic and Atmospheric Administration (NOAA) and covers a global dataset of Weather Data from Airfields (METARs).
