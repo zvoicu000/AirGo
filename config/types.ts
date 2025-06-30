@@ -3,7 +3,7 @@
  */
 
 export const enum Region {
-  primary = 'us-west-1',
+  primary = 'eu-west-1',
 }
 
 export const enum Stage {
