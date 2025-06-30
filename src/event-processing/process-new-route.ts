@@ -104,16 +104,12 @@ export const handler = async (event: DynamoDBStreamEvent): Promise<undefined> =>
       optimisedRoute = :optimisedRoute,
       optimisedRouteDistance = :optimisedRouteDistance,
       populationImpact = :populationImpact,
-      noiseImpact = :noiseImpact,
-      visibilityRisk = :visibilityRisk,
-      windRisk = :windRisk`,
+      noiseImpact = :noiseImpact`,
     ExpressionAttributeValues: {
       ':optimisedRoute': optimisedRoute,
       ':optimisedRouteDistance': routeDistance,
       ':populationImpact': populationImpact,
       ':noiseImpact': noiseImpact,
-      ':visibilityRisk': visibilityRisk,
-      ':windRisk': windRisk,
     },
   });
   await ddb.send(params);
