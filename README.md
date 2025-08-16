@@ -11,6 +11,9 @@ This project is a fully functional backend and frontend system for drone deliver
 - Data preprocessing and seeding scripts  
 - Secure, scalable, and cost-effective architecture
 
+<img width="1837" height="998" alt="image" src="https://github.com/user-attachments/assets/d9f02619-9794-4abe-b1c9-ed0009db0a02" />
+
+
 ## Tech Stack  
 <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" height="30"/>  
 <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" height="30"/>  
