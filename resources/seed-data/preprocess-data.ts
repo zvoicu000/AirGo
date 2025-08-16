@@ -27,32 +27,37 @@
  *      (This file format can be used for direct DynamoDB seeding on creation via S3)
  */
 
-import * as fs from 'fs';
-import * as zlib from 'zlib';
-import * as proj4 from 'proj4';
-import * as ngeohash from 'ngeohash';
+import fs from 'fs';
+import zlib from 'zlib';
+import proj4 from 'proj4';
+import ngeohash from 'ngeohash';
 import { fromArrayBuffer } from 'geotiff';
 import { marshall } from '@aws-sdk/util-dynamodb';
 
-// Manually define EPSG:27700 (British National Grid)
+
+
+
+
+// Define EPSG:3035 (ETRS89 / LAEA Europe)
 proj4.defs(
-  'EPSG:27700',
-  '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs',
+  'EPSG:3035',
+  '+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs'
 );
 
-const BNG = 'EPSG:27700';
+const EU_LAEA = 'EPSG:3035';
 const WGS84 = 'EPSG:4326';
 const PARTITION_KEY_HASH_PRECISION = 5; // GeoHash precision for partition key (approx 5km resolution)
 const SORT_KEY_HASH_PRECISION = 8; // GeoHash precision for sort key (approx 50m resolution)
 const GSI_HASH_PRECISION = 4; // GeoHash precision for GSI partition key (approx 40km resolution)
-const INPUT_FILE = 'resources/seed-data/population-data/input/uk-population-data.tif';
-const OUTPUT_FILE = 'resources/seed-data/population-data/processed/uk-population-data.json.gzip';
+const INPUT_FILE = 'resources/seed-data/population-data/input/rou_ppp_2019_1km_Aggregated.tif';
+const OUTPUT_FILE = 'resources/seed-data/population-data/processed/rou_ppp_2019_1km_Aggregated.json.gzip';
 
+// Romania bounding box (approximate)
 const areaOfInterest = {
-  minLat: 50.8,
-  maxLat: 55.8,
-  minLon: -3.0,
-  maxLon: 1.8,
+  minLat: 43.6,   // Southern Romania
+  maxLat: 48.3,   // Northern Romania
+  minLon: 20.3,   // Western Romania
+  maxLon: 29.7,   // Eastern Romania
 };
 
 /**
@@ -154,7 +159,7 @@ async function extractPopulationData(tifPath: string): Promise<void> {
       const easting = originX + (x + 0.5) * xRes;
       const northing = originY + (y + 0.5) * yRes;
 
-      const [lon, lat] = proj4(BNG, WGS84, [easting, northing]);
+  const [lon, lat] = [easting, northing];
 
       // If the coordinates are outside the area of interest, skip them
       // This is done to reduce the number of items written to DynamoDB and save time on initial deployment
@@ -182,6 +187,7 @@ async function extractPopulationData(tifPath: string): Promise<void> {
 
       const marshalled = marshall(item);
       gzipStream.write(JSON.stringify({ Item: marshalled }) + '\n');
+
     }
   }
 

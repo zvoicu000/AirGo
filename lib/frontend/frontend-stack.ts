@@ -28,13 +28,13 @@ export class FrontendStack extends Stack {
     super(scope, id, props);
 
     // Create an S3 bucket to host the React application
-    const websiteBucket = new Bucket(this, 'DroneServiceWebsiteBucket', {
+    const websiteBucket = new Bucket(this, 'DroneServiceWebsiteBucketV2', {
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
     // Create CloudFront distribution
-    this.distribution = new Distribution(this, 'DroneServiceWebsiteDistribution', {
+    this.distribution = new Distribution(this, 'DroneServiceWebsiteDistributionV2', {
       defaultRootObject: 'index.html',
       defaultBehavior: {
         origin: S3BucketOrigin.withOriginAccessControl(websiteBucket),
