@@ -38,7 +38,7 @@
     "@types/xml2js": "^0.4.14",
     "@typescript-eslint/parser": "^8.35.0",
     "aws-sdk-client-mock": "^4.1.0",
-    "axios": "^1.10.0",
+    "axios": "^1.11.0",
     "cdk-nag": "^2.36.27",
     "esbuild": "^0.25.5",
     "eslint": "^9.29.0",
