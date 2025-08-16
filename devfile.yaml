@@ -1,0 +1,21 @@
+# This file is used to define the development environment for the project.
+# It specifies the components, commands, and other configurations needed to set up the environment.
+# The devfile is used by Amazon Q to create a development environment for the project and validate changes.
+schemaVersion: 2.0.0
+components:
+  - name: dev
+    container:
+      image: public.ecr.aws/aws-mde/universal-image:latest
+commands:
+  - id: install
+    exec:
+      component: dev
+      commandLine: "npm install"
+  - id: build
+    exec:
+      component: dev
+      commandLine: "npm run build"
+  - id: test
+    exec:
+      component: dev
+      commandLine: "npm run test"

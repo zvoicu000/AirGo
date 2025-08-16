@@ -1,0 +1,55 @@
+{
+  "Records": [
+    {
+      "eventID": "c7cded2dc06fba8174d084476ea140d9",
+      "eventName": "INSERT",
+      "eventVersion": "1.1",
+      "eventSource": "aws:dynamodb",
+      "awsRegion": "eu-west-1",
+      "dynamodb": {
+        "ApproximateCreationDateTime": 1750956893,
+        "Keys": {
+          "PK": {
+            "S": "01JYPJKS13MS4Z9KAG487JMVWT"
+          }
+        },
+        "NewImage": {
+          "routePoints": {
+            "L": [
+              {
+                "M": {
+                  "lon": {
+                    "N": "-0.808868408203125"
+                  },
+                  "lat": {
+                    "N": "51.24064096155532"
+                  }
+                }
+              },
+              {
+                "M": {
+                  "lon": {
+                    "N": "-0.4851150512695313"
+                  },
+                  "lat": {
+                    "N": "51.250741914997924"
+                  }
+                }
+              }
+            ]
+          },
+          "PK": {
+            "S": "01JYPJKS13MS4Z9KAG487JMVWT"
+          },
+          "ttl": {
+            "N": "1751561693"
+          }
+        },
+        "SequenceNumber": "615300003514996182746875",
+        "SizeBytes": 142,
+        "StreamViewType": "NEW_AND_OLD_IMAGES"
+      },
+      "eventSourceARN": "arn:aws:dynamodb:eu-west-1:856511401652:table/RoutesTable/stream/2025-06-26T13:54:48.867"
+    }
+  ]
+}
