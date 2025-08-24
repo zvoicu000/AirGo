@@ -1,4 +1,4 @@
-# Drone Delivery Service  
+# AirGo 
 🚁 A cloud-native platform for planning, optimizing, and monitoring drone delivery routes in real time.
 
 This project is a fully functional backend and frontend system for drone delivery, built with TypeScript, React, AWS CDK, and serverless technologies. It features route optimization, population and weather risk analysis, interactive map visualization, and automated AWS infrastructure deployment. Designed for extensibility and learning, the platform demonstrates modern cloud, geospatial, and mapping concepts.
